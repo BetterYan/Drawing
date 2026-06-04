@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_main">
+
+    <!-- 顶部装饰：星星 -->
+    <TextView
+        android:id="@+id/deco_stars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:alpha="0.5"
+        android:text="⭐ 🌟 ✨ ⭐ 🌟"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 中间内容区域 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 大图标 -->
+        <TextView
+            android:id="@+id/tv_big_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎨"
+            android:textSize="80sp" />
+
+        <!-- 标题 -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/main_title"
+            android:textColor="@color/kid_pink_dark"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:shadowColor="#40000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3" />
+
+        <!-- 副标题 -->
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/main_subtitle"
+            android:textColor="@color/kid_light_text"
+            android:textSize="16sp" />
+
+        <!-- 开始绘画按钮 -->
+        <Button
+            android:id="@+id/btn_start_draw"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/btn_kid_primary"
+            android:elevation="6dp"
+            android:minWidth="220dp"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:text="@string/btn_start_draw"
+            android:textColor="@color/kid_white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- 底部装饰 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:alpha="0.4"
+            android:text="🖍️ ✏️ 🖌️"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <!-- 底部装饰小云朵 -->
+    <TextView
+        android:id="@+id/deco_clouds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:alpha="0.3"
+        android:text="☁️     ☁️     ☁️"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

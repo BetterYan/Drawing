@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Night theme for kids - soft dark with cute accents -->
+    <style name="Theme.Drawing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/kid_pink</item>
+        <item name="colorPrimaryVariant">@color/kid_pink_dark</item>
+        <item name="colorOnPrimary">@color/kid_white</item>
+        <item name="colorSecondary">@color/kid_blue</item>
+        <item name="colorSecondaryVariant">@color/kid_blue_light</item>
+        <item name="colorOnSecondary">@color/kid_white</item>
+        <item name="android:colorBackground">#3D2C3A</item>
+        <item name="colorSurface">#4A3B47</item>
+        <item name="colorOnSurface">#F5E6F0</item>
+        <item name="android:statusBarColor">@color/kid_pink_dark</item>
+        <item name="android:navigationBarColor">#3D2C3A</item>
+        <item name="shapeAppearanceSmallComponent">@style/KidShapeSmall</item>
+        <item name="shapeAppearanceMediumComponent">@style/KidShapeMedium</item>
+        <item name="shapeAppearanceLargeComponent">@style/KidShapeLarge</item>
+    </style>
+
+</resources>

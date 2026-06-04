@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Kids Theme Colors -->
+    <color name="kid_pink">#FF7EB3</color>
+    <color name="kid_pink_light">#FFB6D3</color>
+    <color name="kid_pink_dark">#E8558D</color>
+
+    <color name="kid_blue">#7EC8E3</color>
+    <color name="kid_blue_light">#B3E0F0</color>
+
+    <color name="kid_yellow">#FFD700</color>
+    <color name="kid_yellow_light">#FFF1A8</color>
+
+    <color name="kid_green">#7ED957</color>
+    <color name="kid_green_light">#B8F0A0</color>
+
+    <color name="kid_purple">#C3A6D8</color>
+    <color name="kid_purple_light">#E0D0F0</color>
+
+    <color name="kid_orange">#FF8A65</color>
+    <color name="kid_orange_light">#FFBB99</color>
+
+    <color name="kid_cream">#FFF8E7</color>
+    <color name="kid_white">#FFFFFF</color>
+    <color name="kid_dark_text">#5D4037</color>
+    <color name="kid_light_text">#8D6E63</color>
+
+    <!-- Drawing Colors for Palette -->
+    <color name="draw_red">#FF5252</color>
+    <color name="draw_pink">#FF4081</color>
+    <color name="draw_purple">#9C27B0</color>
+    <color name="draw_deep_purple">#673AB7</color>
+    <color name="draw_indigo">#3F51B5</color>
+    <color name="draw_blue">#2196F3</color>
+    <color name="draw_light_blue">#03A9F4</color>
+    <color name="draw_cyan">#00BCD4</color>
+    <color name="draw_teal">#009688</color>
+    <color name="draw_green">#4CAF50</color>
+    <color name="draw_light_green">#8BC34A</color>
+    <color name="draw_lime">#CDDC39</color>
+    <color name="draw_yellow">#FFEB3B</color>
+    <color name="draw_amber">#FFC107</color>
+    <color name="draw_orange">#FF9800</color>
+    <color name="draw_deep_orange">#FF5722</color>
+    <color name="draw_brown">#795548</color>
+    <color name="draw_grey">#9E9E9E</color>
+    <color name="draw_black">#212121</color>
+    <color name="draw_white">#FFFFFF</color>
+</resources>

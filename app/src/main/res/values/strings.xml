@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">宝贝画画</string>
+    <string name="btn_start_draw">开始绘画 🎨</string>
+    <string name="splash_message">准备好画画了吗？</string>
+    <string name="main_title">宝贝画画</string>
+    <string name="main_subtitle">选一个喜欢的图案开始涂色吧！</string>
+    <string name="gallery_title">选择图案</string>
+    <string name="drawing_title">涂色画画</string>
+    <string name="tool_brush">画笔</string>
+    <string name="tool_eraser">橡皮擦</string>
+    <string name="tool_fill">填充</string>
+    <string name="tool_undo">撤销</string>
+    <string name="tool_redo">重做</string>
+    <string name="tool_clear">清空</string>
+    <string name="btn_save">保存到相册</string>
+    <string name="btn_discard">放弃</string>
+    <string name="save_success">已保存到相册！</string>
+    <string name="save_failed">保存失败，请重试</string>
+    <string name="discard_confirm">确定要放弃当前绘画吗？</string>
+    <string name="no_template">没有找到素材，请在 assets/templates 文件夹中添加图片</string>
+</resources>

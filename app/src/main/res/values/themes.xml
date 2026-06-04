@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Splash Theme - Full screen, no action bar -->
+    <style name="Theme.Drawing.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/kid_pink</item>
+        <item name="android:navigationBarColor">@color/kid_pink</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <!-- Base application theme - Kid friendly -->
+    <style name="Theme.Drawing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand colors -->
+        <item name="colorPrimary">@color/kid_pink</item>
+        <item name="colorPrimaryVariant">@color/kid_pink_dark</item>
+        <item name="colorOnPrimary">@color/kid_white</item>
+
+        <!-- Secondary brand colors -->
+        <item name="colorSecondary">@color/kid_blue</item>
+        <item name="colorSecondaryVariant">@color/kid_blue_light</item>
+        <item name="colorOnSecondary">@color/kid_white</item>
+
+        <!-- Surface colors -->
+        <item name="android:colorBackground">@color/kid_cream</item>
+        <item name="colorSurface">@color/kid_white</item>
+        <item name="colorOnSurface">@color/kid_dark_text</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/kid_pink</item>
+        <item name="android:navigationBarColor">@color/kid_white</item>
+
+        <!-- Shape -->
+        <item name="shapeAppearanceSmallComponent">@style/KidShapeSmall</item>
+        <item name="shapeAppearanceMediumComponent">@style/KidShapeMedium</item>
+        <item name="shapeAppearanceLargeComponent">@style/KidShapeLarge</item>
+    </style>
+
+    <!-- Rounded shapes for kid-friendly look -->
+    <style name="KidShapeSmall" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="KidShapeMedium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="KidShapeLarge" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+
+</resources>
