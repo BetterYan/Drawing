@@ -216,6 +216,10 @@ class DrawingActivity : AppCompatActivity() {
                 .setNegativeButton("继续画", null)
                 .show()
         }
+        binding.btnBackDrawing.setOnClickListener {
+            finish()
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        }
     }
 
     private fun updateUndoRedoState() {

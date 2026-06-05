@@ -45,7 +45,10 @@ class GalleryActivity : AppCompatActivity() {
         adapter = TemplateAdapter { template ->
             onTemplateSelected(template)
         }
-        binding.rvTemplates.layoutManager = GridLayoutManager(this, 3)
+        // 竖屏3列，横屏5列（大屏横屏更多列）
+        val spanCount = if (resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE) 5 else 3
+        binding.rvTemplates.layoutManager = GridLayoutManager(this, spanCount)
         binding.rvTemplates.adapter = adapter
     }
 
