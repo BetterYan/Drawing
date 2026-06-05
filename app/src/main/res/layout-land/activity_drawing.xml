@@ -36,12 +36,9 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TextView
+        <View
             android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:gravity="center"
-            android:text="🎨"
-            android:textSize="16sp" />
+            android:layout_height="32dp" />
     </LinearLayout>
 
     <!-- 绘图画布（占据主要空间） -->
@@ -114,6 +111,29 @@
                     android:text="🖍️"
                     android:textSize="14sp" />
             </LinearLayout>
+        </LinearLayout>
+
+        <!-- 区域锁定（紧凑） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingVertical="3dp">
+
+            <TextView
+                android:id="@+id/btn_region_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_region_lock_on"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingHorizontal="14dp"
+                android:text="@string/region_lock_on_text"
+                android:textColor="@color/kid_white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- 第二行：工具按钮 + 保存/放弃 -->

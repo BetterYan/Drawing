@@ -61,6 +61,7 @@ class DrawingActivity : AppCompatActivity() {
         setupToolButtons()
         setupBrushSize()
         setupActionButtons()
+        setupRegionLock()
     }
 
     private fun loadTemplate() {
@@ -219,6 +220,35 @@ class DrawingActivity : AppCompatActivity() {
         binding.btnBackDrawing.setOnClickListener {
             finish()
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        }
+    }
+
+    /**
+     * 区域锁定切换按钮（默认开启）。
+     * 按钮样式：绿色药丸 = 锁定 / 橙色药丸 = 自由涂色。
+     */
+    private fun setupRegionLock() {
+        val lockBtn = binding.btnRegionLock
+        val drawingView = binding.drawingView
+
+        fun updateLockUI() {
+            if (drawingView.constrainToRegion) {
+                lockBtn.text = getString(R.string.region_lock_on_text)
+                lockBtn.setBackgroundResource(R.drawable.bg_region_lock_on)
+            } else {
+                lockBtn.text = getString(R.string.region_lock_off_text)
+                lockBtn.setBackgroundResource(R.drawable.bg_region_lock_off)
+            }
+        }
+
+        drawingView.onRegionReadyListener = { updateLockUI() }
+
+        lockBtn.setOnClickListener {
+            drawingView.constrainToRegion = !drawingView.constrainToRegion
+            updateLockUI()
+            Toast.makeText(this,
+                if (drawingView.constrainToRegion) R.string.region_toggle_on else R.string.region_toggle_off,
+                Toast.LENGTH_SHORT).show()
         }
     }
 

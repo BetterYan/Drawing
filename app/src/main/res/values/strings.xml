@@ -19,4 +19,8 @@
     <string name="save_failed">保存失败，请重试</string>
     <string name="discard_confirm">确定要放弃当前绘画吗？</string>
     <string name="no_template">没有找到素材，请在 assets/templates 文件夹中添加图片</string>
+    <string name="region_lock_on_text">🔒 区域内涂色</string>
+    <string name="region_lock_off_text">🔓 自由涂色</string>
+    <string name="region_toggle_on">区域锁定已开启</string>
+    <string name="region_toggle_off">区域锁定已关闭</string>
 </resources>
