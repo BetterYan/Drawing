@@ -2,9 +2,9 @@ package com.zucky.drawing
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.animation.AnimationUtils
 import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.zucky.drawing.databinding.ActivityMainBinding
 import com.zucky.drawing.gallery.GalleryActivity
 
@@ -13,6 +13,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 必须在 super.onCreate 和 setContentView 之前调用
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

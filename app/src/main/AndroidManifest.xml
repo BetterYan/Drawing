@@ -17,22 +17,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Drawing">
 
-        <!-- Splash Screen (Launcher) -->
+        <!-- Launcher: 使用 Android 12+ SplashScreen API -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Drawing.Splash">
+            android:theme="@style/Theme.Drawing.SplashScreen"
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Main Screen -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:screenOrientation="fullSensor" />
 
         <!-- Template Gallery -->
         <activity
