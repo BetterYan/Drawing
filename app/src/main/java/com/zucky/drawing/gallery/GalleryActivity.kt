@@ -1,9 +1,10 @@
 package com.zucky.drawing.gallery
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.app.Activity
 import android.widget.Toast
+import com.zucky.drawing.applyTransition
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.zucky.drawing.R
@@ -14,7 +15,6 @@ import com.zucky.drawing.model.TemplateGenerator
 import com.zucky.drawing.model.TemplateSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -37,7 +37,7 @@ class GalleryActivity : AppCompatActivity() {
 
         binding.btnBack.setOnClickListener {
             finish()
-            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            applyTransition(Activity.OVERRIDE_TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
     }
 
@@ -110,7 +110,7 @@ class GalleryActivity : AppCompatActivity() {
             }
         }
         startActivity(intent)
-        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        applyTransition(Activity.OVERRIDE_TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 
     override fun onDestroy() {

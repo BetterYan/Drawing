@@ -13,7 +13,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.app.Activity
 import android.widget.Toast
+import com.zucky.drawing.applyTransition
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -212,14 +214,14 @@ class DrawingActivity : AppCompatActivity() {
                 .setMessage(getString(R.string.discard_confirm))
                 .setPositiveButton("确定放弃") { _, _ ->
                     finish()
-                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                    applyTransition(Activity.OVERRIDE_TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                 }
                 .setNegativeButton("继续画", null)
                 .show()
         }
         binding.btnBackDrawing.setOnClickListener {
             finish()
-            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            applyTransition(Activity.OVERRIDE_TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
     }
 

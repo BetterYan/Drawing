@@ -1,6 +1,7 @@
 package com.zucky.drawing
 
 import android.content.Intent
+import android.app.Activity
 import android.os.Bundle
 import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         // 点击开始绘画
         binding.btnStartDraw.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
-            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            applyTransition(Activity.OVERRIDE_TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
     }
 }
