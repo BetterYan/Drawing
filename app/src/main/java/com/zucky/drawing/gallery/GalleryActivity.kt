@@ -2,7 +2,8 @@ package com.zucky.drawing.gallery
 
 import android.content.Intent
 import android.os.Bundle
-import android.app.Activity
+import com.zucky.drawing.TRANSITION_OPEN
+import com.zucky.drawing.TRANSITION_CLOSE
 import android.widget.Toast
 import com.zucky.drawing.applyTransition
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +38,7 @@ class GalleryActivity : AppCompatActivity() {
 
         binding.btnBack.setOnClickListener {
             finish()
-            applyTransition(Activity.OVERRIDE_TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            applyTransition(TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
     }
 
@@ -110,7 +111,7 @@ class GalleryActivity : AppCompatActivity() {
             }
         }
         startActivity(intent)
-        applyTransition(Activity.OVERRIDE_TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        applyTransition(TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 
     override fun onDestroy() {

@@ -53,21 +53,54 @@ object TemplateGenerator {
         strokeCap = Paint.Cap.ROUND
     }
 
-    private val fillPaint = Paint().apply {
-        color = android.graphics.Color.WHITE
+    /** 模板主题填充色（预览模式使用） */
+    private val templateColors = mapOf(
+        0 to android.graphics.Color.rgb(255, 215, 0),    // ⭐ 星星 - 金色
+        1 to android.graphics.Color.rgb(255, 105, 180),  // ❤️ 爱心 - 粉红
+        2 to android.graphics.Color.rgb(255, 182, 193),  // 🌸 小花花 - 浅粉
+        3 to android.graphics.Color.rgb(210, 180, 140),  // 🏠 小房子 - 浅棕
+        4 to android.graphics.Color.rgb(189, 189, 189),  // 🐱 小猫咪 - 浅灰
+        5 to android.graphics.Color.rgb(135, 206, 235),  // 🐟 小鱼儿 - 浅蓝
+        6 to android.graphics.Color.rgb(216, 191, 216),  // 🦋 小蝴蝶 - 淡紫
+        7 to android.graphics.Color.rgb(255, 218, 185),  // ☀️ 太阳公公 - 蜜桃
+        8 to android.graphics.Color.rgb(255, 255, 224),  // 🌙 月亮姐姐 - 淡黄
+        9 to android.graphics.Color.rgb(255, 218, 185),  // 🍦 冰淇淋 - 蜜桃
+        10 to android.graphics.Color.rgb(144, 238, 144), // 🌳 小树 - 浅绿
+        11 to android.graphics.Color.rgb(255, 99, 71),   // 🚗 小汽车 - 番茄红
+    )
+
+    private fun createFillPaint(color: Int) = Paint().apply {
+        this.color = color
         style = Paint.Style.FILL
         isAntiAlias = true
     }
 
+    /** 当前绘制使用的填充色（null = 只画线稿） */
+    private var currentFillColor: Int? = null
+
     /**
-     * 生成指定 ID 的模板 Bitmap
+     * 生成指定 ID 的模板 Bitmap（纯线稿，用于 DrawingView 区域分析）
      */
     fun generateTemplate(generatorId: Int, size: Int = 1024): Bitmap {
+        return drawTemplateInternal(generatorId, size, withFill = false)
+    }
+
+    /**
+     * 生成指定 ID 的彩色预览 Bitmap（用于画廊缩略图展示）
+     */
+    fun generatePreview(generatorId: Int, size: Int = 256): Bitmap {
+        return drawTemplateInternal(generatorId, size, withFill = true)
+    }
+
+    private fun drawTemplateInternal(generatorId: Int, size: Int, withFill: Boolean): Bitmap {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         // 白色背景
         canvas.drawColor(android.graphics.Color.WHITE)
+
+        // 设置填充色
+        currentFillColor = if (withFill) templateColors[generatorId] else null
 
         val cx = size / 2f
         val cy = size / 2f
@@ -88,8 +121,25 @@ object TemplateGenerator {
             11 -> drawCar(canvas, cx, cy + size * 0.05f, size * 0.4f)
         }
 
+        currentFillColor = null
         return bitmap
     }
+
+    // ── 填充辅助 ────────────────────────────────
+
+    private fun Canvas.fillPath(path: Path) {
+        currentFillColor?.let { drawPath(path, createFillPaint(it)) }
+    }
+
+    private fun Canvas.fillCircle(cx: Float, cy: Float, radius: Float) {
+        currentFillColor?.let { drawCircle(cx, cy, radius, createFillPaint(it)) }
+    }
+
+    private fun Canvas.fillRect(rect: RectF) {
+        currentFillColor?.let { drawRect(rect, createFillPaint(it)) }
+    }
+
+    // ── 各模板绘制方法 ──────────────────────────
 
     private fun drawStar(canvas: Canvas, cx: Float, cy: Float, r: Float) {
         val path = Path()
@@ -105,6 +155,7 @@ object TemplateGenerator {
             path.lineTo(cx + innerR * Math.cos(innerAngle).toFloat(), cy + innerR * Math.sin(innerAngle).toFloat())
         }
         path.close()
+        canvas.fillPath(path)
         canvas.drawPath(path, outlinePaint)
     }
 
@@ -116,6 +167,7 @@ object TemplateGenerator {
         // Right curve
         path.cubicTo(cx + r * 0.5f, cy - r * 0.8f, cx + r * 1.4f, cy - r * 0.1f, cx, cy + r * 0.7f)
         path.close()
+        canvas.fillPath(path)
         canvas.drawPath(path, outlinePaint)
     }
 
@@ -125,9 +177,11 @@ object TemplateGenerator {
             val angle = Math.toRadians(i * 60.0)
             val px = cx + r * 0.55f * Math.cos(angle).toFloat()
             val py = cy + r * 0.55f * Math.sin(angle).toFloat()
+            canvas.fillCircle(px, py, r * 0.3f)
             canvas.drawCircle(px, py, r * 0.3f, outlinePaint)
         }
         // Center
+        canvas.fillCircle(cx, cy, r * 0.25f)
         canvas.drawCircle(cx, cy, r * 0.25f, outlinePaint)
         // Stem
         outlinePaint.strokeWidth = 8f
@@ -154,29 +208,35 @@ object TemplateGenerator {
         roofPath.lineTo(right + w * 0.1f, top)
         roofPath.close()
         outlinePaint.strokeWidth = 6f
+        canvas.fillPath(roofPath)
         canvas.drawPath(roofPath, outlinePaint)
 
         // House body
+        canvas.fillRect(RectF(left, top, right, bottom))
         canvas.drawRect(RectF(left, top, right, bottom), outlinePaint)
 
         // Door
         val doorW = w * 0.3f
         val doorH = h * 0.5f
+        canvas.fillRect(RectF(cx - doorW / 2, bottom - doorH, cx + doorW / 2, bottom))
         canvas.drawRect(RectF(cx - doorW / 2, bottom - doorH, cx + doorW / 2, bottom), outlinePaint)
 
         // Window
         val winSize = w * 0.2f
+        canvas.fillRect(RectF(cx + w * 0.2f, top + h * 0.15f, cx + w * 0.2f + winSize, top + h * 0.15f + winSize))
         canvas.drawRect(RectF(cx + w * 0.2f, top + h * 0.15f, cx + w * 0.2f + winSize, top + h * 0.15f + winSize), outlinePaint)
         val winPaint = Paint(outlinePaint).apply { strokeWidth = 3f }
         canvas.drawLine(cx + w * 0.2f + winSize / 2, top + h * 0.15f, cx + w * 0.2f + winSize / 2, top + h * 0.15f + winSize, winPaint)
         canvas.drawLine(cx + w * 0.2f, top + h * 0.15f + winSize / 2, cx + w * 0.2f + winSize, top + h * 0.15f + winSize / 2, winPaint)
 
         // Chimney
+        canvas.fillRect(RectF(cx + w * 0.3f, top - h * 0.5f, cx + w * 0.5f, top - h * 0.1f))
         canvas.drawRect(RectF(cx + w * 0.3f, top - h * 0.5f, cx + w * 0.5f, top - h * 0.1f), outlinePaint)
     }
 
     private fun drawCat(canvas: Canvas, cx: Float, cy: Float, r: Float) {
         // Face
+        canvas.fillCircle(cx, cy, r)
         canvas.drawCircle(cx, cy, r, outlinePaint)
         // Ears
         val earPath = Path()
@@ -184,6 +244,7 @@ object TemplateGenerator {
         earPath.lineTo(cx - r * 0.9f, cy - r * 1.3f)
         earPath.lineTo(cx - r * 0.2f, cy - r * 0.7f)
         earPath.close()
+        canvas.fillPath(earPath)
         canvas.drawPath(earPath, outlinePaint)
 
         val earPathR = Path()
@@ -191,6 +252,7 @@ object TemplateGenerator {
         earPathR.lineTo(cx + r * 0.9f, cy - r * 1.3f)
         earPathR.lineTo(cx + r * 0.2f, cy - r * 0.7f)
         earPathR.close()
+        canvas.fillPath(earPathR)
         canvas.drawPath(earPathR, outlinePaint)
 
         // Eyes
@@ -224,6 +286,7 @@ object TemplateGenerator {
         bodyPath.cubicTo(cx - r * 0.3f, cy - r * 0.6f, cx + r * 0.5f, cy - r * 0.3f, cx + r * 0.6f, cy)
         bodyPath.cubicTo(cx + r * 0.5f, cy + r * 0.3f, cx - r * 0.3f, cy + r * 0.6f, cx - r * 0.9f, cy)
         bodyPath.close()
+        canvas.fillPath(bodyPath)
         canvas.drawPath(bodyPath, outlinePaint)
 
         // Tail
@@ -232,6 +295,7 @@ object TemplateGenerator {
         tailPath.lineTo(cx + r * 1.1f, cy - r * 0.5f)
         tailPath.lineTo(cx + r * 1.1f, cy + r * 0.5f)
         tailPath.close()
+        canvas.fillPath(tailPath)
         canvas.drawPath(tailPath, outlinePaint)
 
         // Eye
@@ -253,12 +317,14 @@ object TemplateGenerator {
         topLeft.moveTo(cx, cy - r * 0.3f)
         topLeft.cubicTo(cx - r * 0.6f, cy - r * 1.2f, cx - r * 1.0f, cy - r, cx - r * 0.3f, cy - r * 0.2f)
         topLeft.close()
+        canvas.fillPath(topLeft)
         canvas.drawPath(topLeft, outlinePaint)
 
         val topRight = Path()
         topRight.moveTo(cx, cy - r * 0.3f)
         topRight.cubicTo(cx + r * 0.6f, cy - r * 1.2f, cx + r * 1.0f, cy - r, cx + r * 0.3f, cy - r * 0.2f)
         topRight.close()
+        canvas.fillPath(topRight)
         canvas.drawPath(topRight, outlinePaint)
 
         // Bottom wings
@@ -266,12 +332,14 @@ object TemplateGenerator {
         bottomLeft.moveTo(cx, cy - r * 0.1f)
         bottomLeft.cubicTo(cx - r * 0.5f, cy + r * 0.3f, cx - r * 0.7f, cy + r * 0.8f, cx - r * 0.2f, cy + r * 0.3f)
         bottomLeft.close()
+        canvas.fillPath(bottomLeft)
         canvas.drawPath(bottomLeft, outlinePaint)
 
         val bottomRight = Path()
         bottomRight.moveTo(cx, cy - r * 0.1f)
         bottomRight.cubicTo(cx + r * 0.5f, cy + r * 0.3f, cx + r * 0.7f, cy + r * 0.8f, cx + r * 0.2f, cy + r * 0.3f)
         bottomRight.close()
+        canvas.fillPath(bottomRight)
         canvas.drawPath(bottomRight, outlinePaint)
 
         // Antennae
@@ -284,6 +352,7 @@ object TemplateGenerator {
 
     private fun drawSun(canvas: Canvas, cx: Float, cy: Float, r: Float) {
         // Center circle
+        canvas.fillCircle(cx, cy, r * 0.5f)
         canvas.drawCircle(cx, cy, r * 0.5f, outlinePaint)
 
         // Rays
@@ -313,6 +382,7 @@ object TemplateGenerator {
         val path = Path()
         path.addCircle(cx, cy, r, Path.Direction.CW)
         path.addCircle(cx + r * 0.4f, cy - r * 0.1f, r * 0.75f, Path.Direction.CCW)
+        canvas.fillPath(path)
         canvas.drawPath(path, outlinePaint)
 
         // Small stars around
@@ -341,6 +411,7 @@ object TemplateGenerator {
         conePath.lineTo(cx, cy + size * 0.35f)
         conePath.lineTo(cx + size * 0.13f, cy - size * 0.05f)
         conePath.close()
+        canvas.fillPath(conePath)
         canvas.drawPath(conePath, outlinePaint)
 
         // Cone cross lines
@@ -349,10 +420,13 @@ object TemplateGenerator {
         canvas.drawLine(cx - size * 0.04f, cy + size * 0.15f, cx + size * 0.04f, cy + size * 0.15f, conePaint)
 
         // Scoops
+        canvas.fillCircle(cx, cy - size * 0.1f, size * 0.18f)
         canvas.drawCircle(cx, cy - size * 0.1f, size * 0.18f, outlinePaint)
+        canvas.fillCircle(cx, cy - size * 0.25f, size * 0.15f)
         canvas.drawCircle(cx, cy - size * 0.25f, size * 0.15f, outlinePaint)
 
         // Cherry on top
+        canvas.fillCircle(cx, cy - size * 0.38f, size * 0.06f)
         canvas.drawCircle(cx, cy - size * 0.38f, size * 0.06f, outlinePaint)
         val cherryPaint = Paint(outlinePaint).apply { strokeWidth = 2f }
         canvas.drawLine(cx, cy - size * 0.33f, cx, cy - size * 0.4f, cherryPaint)
@@ -362,12 +436,16 @@ object TemplateGenerator {
         // Trunk
         val trunkW = size * 0.08f
         outlinePaint.strokeWidth = 8f
+        canvas.fillRect(RectF(cx - trunkW, cy + size * 0.1f, cx + trunkW, cy + size * 0.4f))
         canvas.drawRect(RectF(cx - trunkW, cy + size * 0.1f, cx + trunkW, cy + size * 0.4f), outlinePaint)
         outlinePaint.strokeWidth = 6f
 
         // Leaf circles (three circles overlapping)
+        canvas.fillCircle(cx, cy - size * 0.05f, size * 0.22f)
         canvas.drawCircle(cx, cy - size * 0.05f, size * 0.22f, outlinePaint)
+        canvas.fillCircle(cx - size * 0.15f, cy + size * 0.0f, size * 0.18f)
         canvas.drawCircle(cx - size * 0.15f, cy + size * 0.0f, size * 0.18f, outlinePaint)
+        canvas.fillCircle(cx + size * 0.15f, cy + size * 0.0f, size * 0.18f)
         canvas.drawCircle(cx + size * 0.15f, cy + size * 0.0f, size * 0.18f, outlinePaint)
     }
 
@@ -383,6 +461,7 @@ object TemplateGenerator {
         bodyPath.lineTo(cx + r, cy + r * 0.2f)
         bodyPath.lineTo(cx - r, cy + r * 0.2f)
         bodyPath.close()
+        canvas.fillPath(bodyPath)
         canvas.drawPath(bodyPath, outlinePaint)
 
         // Windows
@@ -403,6 +482,12 @@ object TemplateGenerator {
         canvas.drawPath(winPath2, winPaint)
 
         // Wheels
+        // 轮子用深灰色填充
+        val wheelFillColor = currentFillColor
+        currentFillColor = android.graphics.Color.rgb(80, 80, 80)
+        canvas.fillCircle(cx - r * 0.55f, cy + r * 0.25f, r * 0.18f)
+        canvas.fillCircle(cx + r * 0.55f, cy + r * 0.25f, r * 0.18f)
+        currentFillColor = wheelFillColor
         canvas.drawCircle(cx - r * 0.55f, cy + r * 0.25f, r * 0.18f, outlinePaint)
         canvas.drawCircle(cx + r * 0.55f, cy + r * 0.25f, r * 0.18f, outlinePaint)
         canvas.drawCircle(cx - r * 0.55f, cy + r * 0.25f, r * 0.05f, outlinePaint)

@@ -37,7 +37,7 @@ class TemplateAdapter(
             // 生成缩略图
             when (val source = template.source) {
                 is TemplateSource.BuiltIn -> {
-                    val bitmap = TemplateGenerator.generateTemplate(source.generatorId, 256)
+                    val bitmap = TemplateGenerator.generatePreview(source.generatorId, 256)
                     binding.ivTemplatePreview.setImageBitmap(bitmap)
                 }
                 is TemplateSource.AssetImage -> {
