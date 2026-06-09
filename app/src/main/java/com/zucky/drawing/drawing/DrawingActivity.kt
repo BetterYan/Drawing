@@ -252,20 +252,23 @@ class DrawingActivity : AppCompatActivity() {
 
         // 放弃
         binding.btnDiscard.setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle("放弃绘画")
-                .setMessage(getString(R.string.discard_confirm))
-                .setPositiveButton("确定放弃") { _, _ ->
-                    finish()
-                    applyTransition(TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                }
-                .setNegativeButton("继续画", null)
-                .show()
+            showDiscardConfirmDialog()
         }
         binding.btnBackDrawing.setOnClickListener {
-            finish()
-            applyTransition(TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            showDiscardConfirmDialog()
         }
+    }
+
+    private fun showDiscardConfirmDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("放弃绘画")
+            .setMessage(getString(R.string.discard_confirm))
+            .setPositiveButton("确定放弃") { _, _ ->
+                finish()
+                applyTransition(TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            }
+            .setNegativeButton("继续画", null)
+            .show()
     }
 
     /**
@@ -373,6 +376,10 @@ class DrawingActivity : AppCompatActivity() {
             e.printStackTrace()
             false
         }
+    }
+
+    override fun onBackPressed() {
+        showDiscardConfirmDialog()
     }
 
     override fun onDestroy() {
