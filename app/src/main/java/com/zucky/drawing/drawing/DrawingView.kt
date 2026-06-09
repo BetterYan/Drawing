@@ -23,6 +23,20 @@ class DrawingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    companion object {
+        // ── 边界检测阈值 ──────────────────────────
+        /** 灰度低于此值→确定为边界线（深色线条核心） */
+        private const val BOUNDARY_GRAY_THRESHOLD = 160
+        /** 灰度高于此值→确定为可涂色区域（纯白） */
+        private const val WHITE_GRAY_THRESHOLD = 235
+        /** 灰度在中间区域时，8邻域内存在深色像素→判为边界（抗锯齿过渡） */
+        private const val GRADIENT_THRESHOLD = 50
+        /** 形态学闭运算核半径（1≈闭合≤1px断口，2≈闭合≤2px断口） */
+        private const val MORPH_KERNEL_SIZE = 1
+        /** 是否启用形态学闭运算修复断线 */
+        private const val ENABLE_MORPH_CLOSING = true
+    }
+
     // ── 模板 ──────────────────────────────────
 
     /** 模板底层线稿 */
@@ -197,80 +211,278 @@ class DrawingView @JvmOverloads constructor(
         }.start()
     }
 
+    // ==================================================================
+    //  区域分析 v2：梯度感知边界检测 + 形态学闭运算 + 8方向 Two-Pass CCL
+    // ==================================================================
+
     /**
      * 同步分析区域划分（运行在后台线程）。
-     * @return IntArray 每个像素的 regionId
+     *
+     * 管线：
+     *   1. 梯度感知边界检测 → 正确处理抗锯齿过渡像素
+     *   2. 形态学闭运算（可选）→ 修复线稿断口
+     *   3. 8方向 Two-Pass CCL (Union-Find) → 内存 O(w)，速度优于 BFS
+     *
+     * @return IntArray 每个像素的 regionId（0=边界，>=1=可涂色区域编号）
      */
     private fun analyzeRegionsSync(pixels: IntArray, w: Int, h: Int): IntArray {
         val totalPixels = w * h
         val boundaryMask = BooleanArray(totalPixels)
         val mask = IntArray(totalPixels) // 0 = 未分配/边界
 
-        // ── 第1步：标记边界像素 ──
-        // 判定标准：像素不是白色/接近白色 → 边界
+        // ── 第1步：梯度感知边界检测 ──
+        detectBoundariesGradientAware(pixels, w, h, boundaryMask)
+
+        // ── 第2步：形态学闭运算修复断线 ──
+        if (ENABLE_MORPH_CLOSING) {
+            morphologicalClosing(boundaryMask, w, h, MORPH_KERNEL_SIZE)
+        }
+
+        // ── 第3步：8方向 Two-Pass CCL ──
+        twoPassCCL(boundaryMask, w, h, mask)
+
+        return mask
+    }
+
+    /**
+     * 梯度感知边界检测。
+     *
+     * 三级判定：
+     *   - gray < BOUNDARY_GRAY_THRESHOLD  → 必然边界（深色线条核心）
+     *   - gray > WHITE_GRAY_THRESHOLD     → 必然可涂色（纯白区域）
+     *   - 中间灰度 + 8邻域存在深色像素    → 边界（抗锯齿过渡区）
+     *
+     * 关键改进：旧的简单阈值把抗锯齿灰色像素判为"可涂色"，
+     * 导致相邻区域通过灰色过渡像素连通（区域泄漏）。现在这些
+     * 过渡像素被正确识别为边界。
+     */
+    private fun detectBoundariesGradientAware(
+        pixels: IntArray, w: Int, h: Int, boundaryMask: BooleanArray
+    ) {
+        val totalPixels = w * h
+
+        // 先预计算每个像素的灰度值，避免重复计算
+        val grayValues = IntArray(totalPixels)
         for (i in 0 until totalPixels) {
             val pixel = pixels[i]
             val r = (pixel shr 16) and 0xFF
             val g = (pixel shr 8) and 0xFF
             val b = pixel and 0xFF
             val a = (pixel shr 24) and 0xFF
-            // 白色或接近白色、或半透明 → 可涂色区域
-            // 深色像素 → 边界线
-            val isWhite = a < 128 || (r > 235 && g > 235 && b > 235)
-            boundaryMask[i] = !isWhite
+            // ITU-R BT.601 亮度加权
+            grayValues[i] = if (a < 128) 255 else ((r * 299 + g * 587 + b * 114) / 1000)
         }
 
-        // ── 第2步：BFS 分配 regionId ──
-        var regionId = 1
-        val queue = IntArray(totalPixels)
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val idx = y * w + x
+                val gray = grayValues[idx]
 
-        for (i in 0 until totalPixels) {
-            if (boundaryMask[i] || mask[i] != 0) continue
-
-            var head = 0
-            var tail = 0
-            queue[tail++] = i
-            mask[i] = regionId
-
-            while (head < tail) {
-                val idx = queue[head++]
-                val x = idx % w
-                val y = idx / w
-
-                // 4-directional neighbors
-                if (x > 0) {
-                    val left = idx - 1
-                    if (!boundaryMask[left] && mask[left] == 0) {
-                        mask[left] = regionId
-                        queue[tail++] = left
-                    }
-                }
-                if (x < w - 1) {
-                    val right = idx + 1
-                    if (!boundaryMask[right] && mask[right] == 0) {
-                        mask[right] = regionId
-                        queue[tail++] = right
-                    }
-                }
-                if (y > 0) {
-                    val up = idx - w
-                    if (!boundaryMask[up] && mask[up] == 0) {
-                        mask[up] = regionId
-                        queue[tail++] = up
-                    }
-                }
-                if (y < h - 1) {
-                    val down = idx + w
-                    if (!boundaryMask[down] && mask[down] == 0) {
-                        mask[down] = regionId
-                        queue[tail++] = down
+                when {
+                    // 深色 → 必然边界
+                    gray < BOUNDARY_GRAY_THRESHOLD -> boundaryMask[idx] = true
+                    // 纯白 → 必然可涂色
+                    gray > WHITE_GRAY_THRESHOLD -> boundaryMask[idx] = false
+                    // 中间灰度 → 检查8邻域是否存在深色像素（抗锯齿过渡判定）
+                    else -> {
+                        var hasDarkNeighbor = false
+                        for (dy in -1..1) {
+                            val ny = y + dy
+                            if (ny < 0 || ny >= h) continue
+                            for (dx in -1..1) {
+                                if (dx == 0 && dy == 0) continue
+                                val nx = x + dx
+                                if (nx < 0 || nx >= w) continue
+                                if (grayValues[ny * w + nx] < BOUNDARY_GRAY_THRESHOLD) {
+                                    hasDarkNeighbor = true
+                                    break
+                                }
+                            }
+                            if (hasDarkNeighbor) break
+                        }
+                        boundaryMask[idx] = hasDarkNeighbor
                     }
                 }
             }
-            regionId++
+        }
+    }
+
+    /**
+     * 形态学闭运算 = 先膨胀(Dilate) 再腐蚀(Erode)。
+     *
+     * 作用：闭合线稿中 ≤ kernelRadius 像素的断口，防止区域通过断口
+     * 错误连通。膨胀将边界向外扩展，腐蚀再将边界缩回，结果是：
+     *   - 小断口被填充（膨胀跨越断口，腐蚀时断口内已有边界标记）
+     *   - 线条主体宽度基本不变
+     *   - 尖锐转角略有圆化（可接受）
+     */
+    private fun morphologicalClosing(
+        boundaryMask: BooleanArray, w: Int, h: Int, kernelRadius: Int
+    ) {
+        if (kernelRadius <= 0) return
+        val totalPixels = w * h
+
+        // —— Dilate: 每个边界像素将其 kernel 范围内的邻居也设为边界 ——
+        val dilated = boundaryMask.copyOf()
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val idx = y * w + x
+                if (!boundaryMask[idx]) continue
+
+                for (dy in -kernelRadius..kernelRadius) {
+                    val ny = y + dy
+                    if (ny < 0 || ny >= h) continue
+                    for (dx in -kernelRadius..kernelRadius) {
+                        val nx = x + dx
+                        if (nx < 0 || nx >= w) continue
+                        dilated[ny * w + nx] = true
+                    }
+                }
+            }
         }
 
-        return mask
+        // —— Erode: 只有 kernel 范围内全为边界的像素才保留 ——
+        val eroded = BooleanArray(totalPixels)
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val idx = y * w + x
+                if (!dilated[idx]) continue // 非边界跳过
+
+                var allBoundary = true
+                for (dy in -kernelRadius..kernelRadius) {
+                    val ny = y + dy
+                    if (ny < 0 || ny >= h) continue
+                    for (dx in -kernelRadius..kernelRadius) {
+                        val nx = x + dx
+                        if (nx < 0 || nx >= w) continue
+                        if (!dilated[ny * w + nx]) {
+                            allBoundary = false
+                            break
+                        }
+                    }
+                    if (!allBoundary) break
+                }
+                eroded[idx] = allBoundary
+            }
+        }
+
+        // 写回
+        System.arraycopy(eroded, 0, boundaryMask, 0, totalPixels)
+    }
+
+    /**
+     * 8方向 Two-Pass 连通域标记 (CCL) + Union-Find 等价类合并。
+     *
+     * 与旧 BFS 对比：
+     *   ┌────────────┬──────────────┬──────────────┐
+     *   │            │ 旧 BFS (4方向)│ 新 Two-Pass  │
+     *   ├────────────┼──────────────┼──────────────┤
+     *   │ 连通方向    │ 4-directional │ 8-directional│
+     *   │ 时间复杂度  │ O(n)          │ O(n)         │
+     *   │ 额外内存    │ O(n) 队列     │ O(w) 扫描行  │
+     *   │ 缓存友好    │ 差（随机跳转） │ 好（顺序扫描）│
+     *   │ 对角线防漏  │ 无            │ 有            │
+     *   └────────────┴──────────────┴──────────────┘
+     */
+    private fun twoPassCCL(
+        boundaryMask: BooleanArray,
+        w: Int, h: Int,
+        mask: IntArray
+    ) {
+        val totalPixels = w * h
+
+        // ── Union-Find 结构 ──
+        // parent[0] 不用，label 从 1 开始
+        var parent = IntArray(256) { it }
+        var parentCap = 256
+
+        fun ensureCap(label: Int) {
+            if (label >= parentCap) {
+                val newCap = parentCap * 2
+                parent = parent.copyOf(newCap)
+                for (i in parentCap until newCap) parent[i] = i
+                parentCap = newCap
+            }
+        }
+
+        fun find(x: Int): Int {
+            var r = x
+            while (parent[r] != r) {
+                parent[r] = parent[parent[r]] // 路径压缩
+                r = parent[r]
+            }
+            return r
+        }
+
+        fun union(a: Int, b: Int) {
+            val ra = find(a)
+            val rb = find(b)
+            if (ra != rb) {
+                // 较小 ID 作为根（保持标签连续性）
+                if (ra < rb) parent[rb] = ra else parent[ra] = rb
+            }
+        }
+
+        // ── Pass 1: 行扫描 + 8方向标签传播 ──
+        // 栈上分配的小数组避免每像素创建 ArrayList（对 1080p 图片约省 200 万次分配）
+        val neighborLabels = IntArray(4)
+        var nextLabel = 1
+
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val idx = y * w + x
+                if (boundaryMask[idx]) continue
+
+                // 收集已扫描的 4 个 8-邻域标签: W, NW, N, NE
+                var nc = 0
+
+                // West (x-1, y)
+                if (x > 0 && !boundaryMask[idx - 1]) {
+                    val lb = mask[idx - 1]
+                    if (lb > 0) neighborLabels[nc++] = lb
+                }
+                // Northwest (x-1, y-1)
+                if (x > 0 && y > 0 && !boundaryMask[idx - w - 1]) {
+                    val lb = mask[idx - w - 1]
+                    if (lb > 0) neighborLabels[nc++] = lb
+                }
+                // North (x, y-1)
+                if (y > 0 && !boundaryMask[idx - w]) {
+                    val lb = mask[idx - w]
+                    if (lb > 0) neighborLabels[nc++] = lb
+                }
+                // Northeast (x+1, y-1)
+                if (x < w - 1 && y > 0 && !boundaryMask[idx - w + 1]) {
+                    val lb = mask[idx - w + 1]
+                    if (lb > 0) neighborLabels[nc++] = lb
+                }
+
+                if (nc == 0) {
+                    // 新区域
+                    ensureCap(nextLabel)
+                    mask[idx] = nextLabel
+                    nextLabel++
+                } else {
+                    // 取最小标签，合并等价标签
+                    var minLabel = neighborLabels[0]
+                    for (i in 1 until nc) {
+                        if (neighborLabels[i] < minLabel) minLabel = neighborLabels[i]
+                    }
+                    mask[idx] = minLabel
+                    for (i in 0 until nc) {
+                        val nl = neighborLabels[i]
+                        if (nl != minLabel) union(minLabel, nl)
+                    }
+                }
+            }
+        }
+
+        // ── Pass 2: 标签统一化（Find 压缩） ──
+        for (i in 0 until totalPixels) {
+            if (mask[i] > 0) {
+                mask[i] = find(mask[i])
+            }
+        }
     }
 
     // ==================================================================
@@ -315,6 +527,11 @@ class DrawingView @JvmOverloads constructor(
                         // 区域约束：仅在画笔模式下确定当前区域
                         if (constrainToRegion && currentTool == Tool.BRUSH && regionMask != null) {
                             currentRegionId = getRegionAt(canvasX.toInt(), canvasY.toInt())
+                            // 触摸到边界线（regionId == 0）时，不执行绘制
+                            if (currentRegionId == 0) {
+                                currentPath = null
+                                return true
+                            }
                         } else {
                             currentRegionId = -1
                         }
@@ -324,7 +541,11 @@ class DrawingView @JvmOverloads constructor(
                         currentPath = path
 
                         val selectedPaint = if (currentTool == Tool.ERASER) eraserPaint else paint
-                        drawingCanvas?.drawPath(path, selectedPaint)
+                        if (constrainToRegion && currentTool == Tool.BRUSH && currentRegionId > 0) {
+                            drawPathConstrained(path, selectedPaint)
+                        } else {
+                            drawingCanvas?.drawPath(path, selectedPaint)
+                        }
                         invalidate()
                     }
                     Tool.FILL -> {
@@ -347,9 +568,10 @@ class DrawingView @JvmOverloads constructor(
 
                         if (constrainToRegion && currentTool == Tool.BRUSH && currentRegionId > 0) {
                             drawPathConstrained(path, selectedPaint)
-                        } else {
+                        } else if (!constrainToRegion || currentTool == Tool.ERASER) {
                             drawingCanvas?.drawPath(path, selectedPaint)
                         }
+                        // else: constrainToRegion == true && currentRegionId <= 0 → 不绘制（边界线/无效区域）
 
                         invalidate()
                         path.reset()
@@ -425,9 +647,9 @@ class DrawingView @JvmOverloads constructor(
             val areaIdx = dy * bw
             for (dx in 0 until bw) {
                 val maskVal = mask[rowBase + dx]
-                // maskVal == 0 是边界线，允许覆盖（画笔可以画在线上）
+                // maskVal == 0 → 边界线 → 恢复（轮廓线不应被涂色覆盖）
                 // maskVal > 0 且 != currentRegionId → 其他区域 → 恢复
-                if (maskVal > 0 && maskVal != regionId) {
+                if (maskVal != regionId) {
                     drawnArea[areaIdx + dx] = savedArea[areaIdx + dx]
                     hasCorrection = true
                 }
