@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.view.animation.OvershootInterpolator
 import com.zucky.drawing.TRANSITION_OPEN
 import com.zucky.drawing.TRANSITION_CLOSE
 import android.widget.Toast
@@ -108,33 +109,74 @@ class DrawingActivity : AppCompatActivity() {
 
     private fun setupColorPalette() {
         val colorContainer = binding.layoutColors
+        val normalSize = resources.getDimensionPixelSize(R.dimen.color_circle_size)
+        val selectedSize = resources.getDimensionPixelSize(R.dimen.color_selected_size)
+        val colorMargin = resources.getDimensionPixelSize(R.dimen.color_margin)
+        // 选中态视觉高度 = selectedSize × 最大缩放 + 描边余量
+        val containerHeight = (selectedSize * 1.08f).toInt() + 8  // 8px 上下留白
+        colorContainer.layoutParams.height = containerHeight
         // 默认选中红色
         binding.drawingView.currentColor = ContextCompat.getColor(this, R.color.draw_red)
 
-        for (colorRes in colorPalette) {
+        for ((index, colorRes) in colorPalette.withIndex()) {
             val colorView = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    resources.getDimensionPixelSize(R.dimen.color_circle_size),
-                    resources.getDimensionPixelSize(R.dimen.color_circle_size)
-                ).apply {
-                    marginEnd = resources.getDimensionPixelSize(R.dimen.color_margin)
+                layoutParams = LinearLayout.LayoutParams(normalSize, normalSize).apply {
+                    marginEnd = colorMargin
                 }
                 setImageResource(R.drawable.bg_color_circle)
                 setColorFilter(ContextCompat.getColor(this@DrawingActivity, colorRes))
                 setOnClickListener {
+                    if (selectedColorView == it) return@setOnClickListener
                     val color = ContextCompat.getColor(this@DrawingActivity, colorRes)
                     binding.drawingView.currentColor = color
-                    // 高亮选中
-                    selectedColorView?.let {
-                        it.setBackgroundResource(0)
-                        it.setPadding(0, 0, 0, 0)
+
+                    // ── 取消前一个选中：先缩回再恢复尺寸 ──
+                    selectedColorView?.let { prev ->
+                        prev.animate()
+                            .scaleX(1f).scaleY(1f)
+                            .setDuration(200)
+                            .setInterpolator(null)
+                            .withEndAction {
+                                prev.setBackgroundResource(R.drawable.bg_color_circle)
+                                prev.setPadding(0, 0, 0, 0)
+                                val lp = prev.layoutParams
+                                lp.width = normalSize
+                                lp.height = normalSize
+                                prev.layoutParams = lp
+                            }
+                            .start()
                     }
+
+                    // ── 选中当前颜色：放大 + 白色光环 + 深色外框 ──
                     it.setBackgroundResource(R.drawable.bg_color_circle_selected)
-                    it.setPadding(4, 4, 4, 4)
+                    it.setPadding(5, 5, 5, 5)
+
+                    val lp = it.layoutParams
+                    lp.width = selectedSize
+                    lp.height = selectedSize
+                    it.layoutParams = lp
+
+                    it.animate()
+                        .scaleX(1.08f).scaleY(1.08f)
+                        .setDuration(300)
+                        .setInterpolator(OvershootInterpolator(1.5f))
+                        .withEndAction {
+                            it.animate()
+                                .scaleX(1.03f).scaleY(1.03f)
+                                .setDuration(150)
+                                .start()
+                        }
+                        .start()
+
                     selectedColorView = it
                 }
             }
             colorContainer.addView(colorView)
+
+            // 默认选中第一个颜色（红色）
+            if (index == 0) {
+                colorView.post { colorView.performClick() }
+            }
         }
     }
 

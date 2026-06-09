@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="color_circle_size">40dp</dimen>
-    <dimen name="color_margin">8dp</dimen>
+    <dimen name="color_circle_size">36dp</dimen>
+    <dimen name="color_margin">6dp</dimen>
+    <dimen name="color_selected_size">42dp</dimen>
 </resources>

@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@color/kid_white" />
-    <stroke android:width="5dp" android:color="@color/kid_dark_text" />
-    <size android:width="40dp" android:height="40dp" />
-</shape>
+<!--
+    选中态颜色指示器：白色光环 + 深色外框
+    原理：此 drawable 作为 ImageView 的 background，
+    ImageView 的 tinted 颜色圆在 foreground，padding 留出白色间隙。
+    结构（由外到内）：
+      - 深色外圈描边（与背景形成强对比）
+      - 白色填充环（"光环"效果）
+      - [padding 5dp] → ImageView 的 tinted 颜色圆
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 深色外圈：10dp 描边，仅内侧 5dp 可见（shape 描边居中绘制） -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/kid_white" />
+            <stroke android:width="10dp" android:color="@color/kid_dark_text" />
+        </shape>
+    </item>
+</layer-list>
