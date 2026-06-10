@@ -20,6 +20,7 @@ import android.widget.Toast
 import com.zucky.drawing.applyTransition
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.zucky.drawing.R
@@ -71,6 +72,13 @@ class DrawingActivity : AppCompatActivity() {
         binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             binding.drawingView.visibleBottomOffset = binding.bottomToolbar.height
         }
+
+        // 拦截系统返回（含手势返回），弹出确认对话框
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showDiscardConfirmDialog()
+            }
+        })
     }
 
     private fun loadTemplate() {
@@ -375,10 +383,6 @@ class DrawingActivity : AppCompatActivity() {
             e.printStackTrace()
             false
         }
-    }
-
-    override fun onBackPressed() {
-        showDiscardConfirmDialog()
     }
 
     override fun onDestroy() {
