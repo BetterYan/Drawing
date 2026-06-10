@@ -66,6 +66,11 @@ class DrawingActivity : AppCompatActivity() {
         setupBrushSize()
         setupActionButtons()
         setupRegionLock()
+
+        // 底部工具栏高度变化时，同步给 DrawingView 以修正模板居中位置
+        binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            binding.drawingView.visibleBottomOffset = binding.bottomToolbar.height
+        }
     }
 
     private fun loadTemplate() {

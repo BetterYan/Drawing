@@ -142,6 +142,20 @@ class DrawingView @JvmOverloads constructor(
     // 用于区域约束的临时像素缓存（避免频繁分配）
     private var tempConstraintPixels: IntArray? = null
 
+    /**
+     * 底部被覆盖的高度（如浮动工具栏）。
+     * 矩阵计算时从 View 总高度中扣除此值，
+     * 使模板在实际可见区域内居中显示。
+     */
+    var visibleBottomOffset: Int = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                updateViewMatrix()
+                invalidate()
+            }
+        }
+
     // ==================================================================
     //  初始化
     // ==================================================================
@@ -170,11 +184,14 @@ class DrawingView @JvmOverloads constructor(
     private fun updateViewMatrix() {
         val tmpl = templateBitmap ?: return
         if (width <= 0 || height <= 0) return
+        // 可见区域高度 = 总高度 - 底部工具栏遮挡
+        val visibleHeight = (height - visibleBottomOffset).coerceAtLeast(1)
         val scaleX = width.toFloat() / tmpl.width
-        val scaleY = height.toFloat() / tmpl.height
+        val scaleY = visibleHeight.toFloat() / tmpl.height
         val scale = minOf(scaleX, scaleY)
         val dx = (width - tmpl.width * scale) / 2f
-        val dy = (height - tmpl.height * scale) / 2f
+        // 模板居中于可见区域（整体上移半个工具栏高度）
+        val dy = (height - tmpl.height * scale) / 2f - visibleBottomOffset / 2f
         viewMatrix.reset()
         viewMatrix.postScale(scale, scale)
         viewMatrix.postTranslate(dx, dy)
