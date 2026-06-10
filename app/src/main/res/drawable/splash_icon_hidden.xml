@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 隐形 Splash 图标：与 Splash 背景色相同，使圆形遮罩完全不可见 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/kid_pink" />
+</shape>

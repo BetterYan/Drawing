@@ -110,8 +110,8 @@ class GalleryActivity : AppCompatActivity() {
                 }
             }
         }
-        startActivity(intent)
         applyTransition(TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        startActivity(intent)
     }
 
     override fun onDestroy() {

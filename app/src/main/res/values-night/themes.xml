@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- SplashScreen 暗色主题：纯色画面，无可见圆圈 -->
+    <style name="Theme.Drawing.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#3D2C3A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="windowSplashScreenIconBackgroundColor">#3D2C3A</item>
+        <item name="postSplashScreenTheme">@style/Theme.Drawing</item>
+    </style>
+
     <!-- Night theme for kids - soft dark with cute accents -->
     <style name="Theme.Drawing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/kid_pink</item>
