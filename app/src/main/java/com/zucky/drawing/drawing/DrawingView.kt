@@ -44,9 +44,6 @@ class DrawingView @JvmOverloads constructor(
         set(value) {
             field = value
             if (value != null) {
-                if (drawingBitmap == null) {
-                    initDrawingBitmap()
-                }
                 updateViewMatrix()
                 // 异步分析区域划分
                 analyzeRegionsAsync(value)
@@ -60,6 +57,9 @@ class DrawingView @JvmOverloads constructor(
 
     private var drawingBitmap: Bitmap? = null
     private var drawingCanvas: Canvas? = null
+    /** drawingBitmap 左上角在模板坐标系中的偏移（可负值） */
+    private var drawOriginX = 0f
+    private var drawOriginY = 0f
 
     // ── 画笔 ──────────────────────────────────
 
@@ -160,42 +160,55 @@ class DrawingView @JvmOverloads constructor(
     //  初始化
     // ==================================================================
 
-    fun initDrawingBitmap() {
-        val w = templateBitmap?.width ?: width
-        val h = templateBitmap?.height ?: height
-        if (w <= 0 || h <= 0) return
-
-        drawingBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        drawingCanvas = Canvas(drawingBitmap!!)
-        undoStack.clear()
-        redoStack.clear()
-        invalidate()
-    }
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        if (drawingBitmap == null) {
-            initDrawingBitmap()
-        }
         updateViewMatrix()
     }
 
-    /** 根据当前 View 尺寸和模板尺寸，重新计算缩放与居中矩阵 */
+    /**
+     * 重新计算缩放矩阵，并确保 drawingBitmap 覆盖整个可见区域。
+     * drawingBitmap 的尺寸 = 可见区域在模板分辨率下的大小，
+     * 这样用户在模板以外的白色画布区域也能自由绘制。
+     */
     private fun updateViewMatrix() {
         val tmpl = templateBitmap ?: return
         if (width <= 0 || height <= 0) return
-        // 可见区域高度 = 总高度 - 底部工具栏遮挡
+
         val visibleHeight = (height - visibleBottomOffset).coerceAtLeast(1)
         val scaleX = width.toFloat() / tmpl.width
         val scaleY = visibleHeight.toFloat() / tmpl.height
         val scale = minOf(scaleX, scaleY)
         val dx = (width - tmpl.width * scale) / 2f
-        // 模板居中于可见区域（整体上移半个工具栏高度）
         val dy = (height - tmpl.height * scale) / 2f - visibleBottomOffset / 2f
+
         viewMatrix.reset()
         viewMatrix.postScale(scale, scale)
         viewMatrix.postTranslate(dx, dy)
         viewMatrix.invert(invertMatrix)
+
+        // 计算可见区域在模板分辨率下的尺寸（覆盖整个 View）
+        val drawW = (width / scale).toInt().coerceAtLeast(1)
+        val drawH = (height / scale).toInt().coerceAtLeast(1)
+        val ox = -dx / scale
+        val oy = -dy / scale
+
+        // 尺寸变化时重建绘图位图，保留已有绘画内容
+        if (drawingBitmap == null || drawingBitmap!!.width != drawW || drawingBitmap!!.height != drawH) {
+            val newBitmap = Bitmap.createBitmap(drawW, drawH, Bitmap.Config.ARGB_8888)
+            val newCanvas = Canvas(newBitmap)
+            drawingBitmap?.let { old ->
+                // 旧位图在新位图中的正确偏移位置绘制
+                newCanvas.drawBitmap(old, ox - drawOriginX, oy - drawOriginY, null)
+                old.recycle()
+            }
+            drawingBitmap = newBitmap
+            drawingCanvas = newCanvas
+            undoStack.clear()
+            redoStack.clear()
+        }
+        drawOriginX = ox
+        drawOriginY = oy
+        invalidate()
     }
 
     // ==================================================================
@@ -526,7 +539,7 @@ class DrawingView @JvmOverloads constructor(
         drawingBitmap?.let { db ->
             canvas.save()
             canvas.concat(viewMatrix)
-            canvas.drawBitmap(db, 0f, 0f, null)
+            canvas.drawBitmap(db, drawOriginX, drawOriginY, null)
             canvas.restore()
         }
     }
@@ -536,10 +549,15 @@ class DrawingView @JvmOverloads constructor(
     // ==================================================================
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // invertMatrix 将屏幕坐标映射到模板坐标系
         val mappedPoints = floatArrayOf(event.x, event.y)
         invertMatrix.mapPoints(mappedPoints)
-        val canvasX = mappedPoints[0]
-        val canvasY = mappedPoints[1]
+        // 转换为 drawingBitmap 坐标系（模板坐标 - 偏移）
+        val canvasX = mappedPoints[0] - drawOriginX
+        val canvasY = mappedPoints[1] - drawOriginY
+        // 模板坐标（用于区域查询）
+        val templateX = mappedPoints[0]
+        val templateY = mappedPoints[1]
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -547,9 +565,9 @@ class DrawingView @JvmOverloads constructor(
                     Tool.BRUSH, Tool.ERASER -> {
                         saveState()
 
-                        // 区域约束：仅在画笔模式下确定当前区域
+                        // 区域约束：仅在画笔模式下确定当前区域（使用模板坐标）
                         if (constrainToRegion && currentTool == Tool.BRUSH && regionMask != null) {
-                            currentRegionId = getRegionAt(canvasX.toInt(), canvasY.toInt())
+                            currentRegionId = getRegionAt(templateX.toInt(), templateY.toInt())
                             // 触摸到边界线（regionId == 0）时，不执行绘制
                             if (currentRegionId == 0) {
                                 currentPath = null
@@ -591,7 +609,7 @@ class DrawingView @JvmOverloads constructor(
 
                         if (constrainToRegion && currentTool == Tool.BRUSH && currentRegionId > 0) {
                             drawPathConstrained(path, selectedPaint)
-                        } else if (!constrainToRegion || currentTool == Tool.ERASER) {
+                        } else if (!constrainToRegion || currentTool == Tool.ERASER || currentRegionId == -1) {
                             drawingCanvas?.drawPath(path, selectedPaint)
                         }
                         // else: constrainToRegion == true && currentRegionId <= 0 → 不绘制（边界线/无效区域）
@@ -628,6 +646,8 @@ class DrawingView @JvmOverloads constructor(
     /**
      * 带区域约束的路径绘制。
      * 先正常绘制路径，再用区域掩码擦除溢出到其他区域的像素。
+     * 路径坐标在 drawingBitmap 空间，区域掩码在模板空间，
+     * 通过 drawOriginX/Y 进行坐标转换。
      */
     private fun drawPathConstrained(path: Path, paint: Paint) {
         val bm = drawingBitmap ?: return
@@ -636,42 +656,45 @@ class DrawingView @JvmOverloads constructor(
         val w = regionWidth
         val h = regionHeight
 
-        // 计算路径的包围盒
+        // 路径包围盒（drawingBitmap 空间）→ 转换到模板空间再裁剪
         val bounds = RectF()
         path.computeBounds(bounds, true)
-        val halfStroke = paint.strokeWidth / 2f + 2f // +2 容差
+        val halfStroke = paint.strokeWidth / 2f + 2f
         bounds.inset(-halfStroke, -halfStroke)
 
-        val bx = bounds.left.toInt().coerceIn(0, w - 1)
-        val by = bounds.top.toInt().coerceIn(0, h - 1)
-        val ex = bounds.right.toInt().coerceIn(0, w - 1)
-        val ey = bounds.bottom.toInt().coerceIn(0, h - 1)
+        // 转换到模板空间并限制在模板范围内
+        val bx = (bounds.left + drawOriginX).toInt().coerceIn(0, w - 1)
+        val by = (bounds.top + drawOriginY).toInt().coerceIn(0, h - 1)
+        val ex = (bounds.right + drawOriginX).toInt().coerceIn(0, w - 1)
+        val ey = (bounds.bottom + drawOriginY).toInt().coerceIn(0, h - 1)
         val bw = (ex - bx + 1).coerceAtLeast(1)
         val bh = (ey - by + 1).coerceAtLeast(1)
 
-        if (bw * bh > w * h) return // 异常大，跳过约束
+        if (bw * bh > w * h) return
 
-        // 1) 保存该区域的原始像素（用于复原溢出部分）
+        // 对应到 drawingBitmap 空间的像素区域
+        val dbx = (bx - drawOriginX).toInt().coerceIn(0, bm.width - bw)
+        val dby = (by - drawOriginY).toInt().coerceIn(0, bm.height - bh)
+
+        // 1) 保存该区域的原始像素
         val savedArea = ensureTempPixels(bw * bh)
-        bm.getPixels(savedArea, 0, bw, bx, by, bw, bh)
+        bm.getPixels(savedArea, 0, bw, dbx, dby, bw, bh)
 
         // 2) 正常绘制路径
         canvas.drawPath(path, paint)
 
         // 3) 读取绘制后的像素
         val drawnArea = IntArray(bw * bh)
-        bm.getPixels(drawnArea, 0, bw, bx, by, bw, bh)
+        bm.getPixels(drawnArea, 0, bw, dbx, dby, bw, bh)
 
         // 4) 遍历：溢出到其他区域的像素恢复为原始值
         val regionId = currentRegionId
         var hasCorrection = false
         for (dy in 0 until bh) {
-            val rowBase = (by + dy) * w + bx
+            val maskRowBase = (by + dy) * w + bx
             val areaIdx = dy * bw
             for (dx in 0 until bw) {
-                val maskVal = mask[rowBase + dx]
-                // maskVal == 0 → 边界线 → 恢复（轮廓线不应被涂色覆盖）
-                // maskVal > 0 且 != currentRegionId → 其他区域 → 恢复
+                val maskVal = mask[maskRowBase + dx]
                 if (maskVal != regionId) {
                     drawnArea[areaIdx + dx] = savedArea[areaIdx + dx]
                     hasCorrection = true
@@ -681,7 +704,7 @@ class DrawingView @JvmOverloads constructor(
 
         // 5) 写回校正后的像素
         if (hasCorrection) {
-            bm.setPixels(drawnArea, 0, bw, bx, by, bw, bh)
+            bm.setPixels(drawnArea, 0, bw, dbx, dby, bw, bh)
         }
     }
 
@@ -696,6 +719,8 @@ class DrawingView @JvmOverloads constructor(
 
     /**
      * Flood fill 填充算法（支持区域约束）。
+     * 入参为 drawingBitmap 坐标，内部通过 drawOriginX/Y 映射到模板坐标做区域检查。
+     * 模板区域外不受区域约束限制，可自由填充。
      */
     private fun performFloodFill(startX: Int, startY: Int) {
         val bitmap = drawingBitmap ?: return
@@ -711,12 +736,18 @@ class DrawingView @JvmOverloads constructor(
         val pixels = IntArray(w * h)
         bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
 
-        // 区域约束：如果启用且有区域数据，限制填充范围
+        // 区域约束：模板坐标起点
         val mask = if (constrainToRegion) regionMask else null
+        val tmplX0 = (startX + drawOriginX).toInt()
+        val tmplY0 = (startY + drawOriginY).toInt()
         val restrictRegionId: Int = if (mask != null) {
-            val idx = startY * w + startX
-            if (idx in mask.indices) mask[idx] else -1
+            getRegionAt(tmplX0, tmplY0)
         } else -1
+
+        val tw = regionWidth
+        val th = regionHeight
+        val ox = drawOriginX
+        val oy = drawOriginY
 
         val queue: Queue<Int> = LinkedList()
         queue.offer(startY * w + startX)
@@ -729,8 +760,16 @@ class DrawingView @JvmOverloads constructor(
             if (x < 0 || x >= w || y < 0 || y >= h) continue
             if (pixels[idx] != targetColor) continue
 
-            // 区域约束检查
-            if (restrictRegionId > 0 && mask != null && idx in mask.indices && mask[idx] != restrictRegionId) continue
+            // 区域约束：仅对模板范围内的像素生效
+            if (restrictRegionId > 0 && mask != null) {
+                val tx = (x + ox).toInt()
+                val ty = (y + oy).toInt()
+                if (tx >= 0 && tx < tw && ty >= 0 && ty < th) {
+                    val maskIdx = ty * tw + tx
+                    if (maskIdx in mask.indices && mask[maskIdx] != restrictRegionId) continue
+                }
+                // 模板范围外不限制，允许自由扩散
+            }
 
             pixels[idx] = replacementColor
 
@@ -815,7 +854,8 @@ class DrawingView @JvmOverloads constructor(
         val canvas = Canvas(result)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(tmpl, 0f, 0f, null)
-        canvas.drawBitmap(drawBm, 0f, 0f, null)
+        // drawingBitmap 的 (0,0) 对应模板坐标 (drawOriginX, drawOriginY)
+        canvas.drawBitmap(drawBm, -drawOriginX, -drawOriginY, null)
         return result
     }
 
