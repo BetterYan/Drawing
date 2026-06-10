@@ -855,7 +855,7 @@ class DrawingView @JvmOverloads constructor(
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(tmpl, 0f, 0f, null)
         // drawingBitmap 的 (0,0) 对应模板坐标 (drawOriginX, drawOriginY)
-        canvas.drawBitmap(drawBm, -drawOriginX, -drawOriginY, null)
+        canvas.drawBitmap(drawBm, drawOriginX, drawOriginY, null)
         return result
     }
 
