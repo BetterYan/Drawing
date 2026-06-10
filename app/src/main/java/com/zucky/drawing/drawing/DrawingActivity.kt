@@ -70,9 +70,6 @@ class DrawingActivity : AppCompatActivity() {
 
     private fun loadTemplate() {
         val sourceType = intent.getStringExtra(EXTRA_TEMPLATE_SOURCE_TYPE) ?: "builtin"
-        val templateName = intent.getStringExtra(EXTRA_TEMPLATE_NAME) ?: "画画"
-
-        binding.tvTemplateName.text = templateName
 
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.IO) {
@@ -252,9 +249,6 @@ class DrawingActivity : AppCompatActivity() {
 
         // 放弃
         binding.btnDiscard.setOnClickListener {
-            showDiscardConfirmDialog()
-        }
-        binding.btnBackDrawing.setOnClickListener {
             showDiscardConfirmDialog()
         }
     }

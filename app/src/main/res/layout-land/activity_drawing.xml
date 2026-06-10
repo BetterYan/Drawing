@@ -1,57 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 横屏布局：工具栏紧凑排列在底部，画布占据主要空间 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 横屏布局：FrameLayout，画布铺满全屏，工具栏覆盖在上方 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/kid_white">
 
-    <!-- 顶部工具栏（横屏更紧凑） -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/kid_pink"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
-
-        <ImageView
-            android:id="@+id/btn_back_drawing"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:contentDescription="返回"
-            android:padding="4dp"
-            android:src="@android:drawable/ic_menu_revert"
-            android:tint="@color/kid_white" />
-
-        <TextView
-            android:id="@+id/tv_template_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="画画"
-            android:textColor="@color/kid_white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="32dp"
-            android:layout_height="32dp" />
-    </LinearLayout>
-
-    <!-- 绘图画布（占据主要空间） -->
+    <!-- 绘图画布（全屏底层） -->
     <com.zucky.drawing.drawing.DrawingView
         android:id="@+id/drawing_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent" />
 
-    <!-- 底部工具面板：两行紧凑布局 -->
+    <!-- 底部工具面板：两行紧凑布局（覆盖在画布上方） -->
     <LinearLayout
+        android:id="@+id/bottom_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="vertical"
         android:background="@drawable/bg_toolbar"
         android:elevation="8dp"
@@ -92,7 +57,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✏️"
+                    android:text="&#x270F;&#xFE0F;"
                     android:textSize="12sp" />
 
                 <SeekBar
@@ -108,7 +73,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🖍️"
+                    android:text="&#x1F58D;&#xFE0F;"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
@@ -167,7 +132,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🖌️"
+                        android:text="&#x1F58C;&#xFE0F;"
                         android:textSize="16sp" />
                 </LinearLayout>
 
@@ -185,7 +150,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🧹"
+                        android:text="&#x1F9F9;"
                         android:textSize="16sp" />
                 </LinearLayout>
 
@@ -203,7 +168,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🪣"
+                        android:text="&#x1FAA3;"
                         android:textSize="16sp" />
                 </LinearLayout>
 
@@ -222,7 +187,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="↩️"
+                        android:text="&#x21A9;&#xFE0F;"
                         android:textSize="16sp" />
                 </LinearLayout>
 
@@ -241,7 +206,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="↪️"
+                        android:text="&#x21AA;&#xFE0F;"
                         android:textSize="16sp" />
                 </LinearLayout>
 
@@ -259,7 +224,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🗑️"
+                        android:text="&#x1F5D1;&#xFE0F;"
                         android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -296,4 +261,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

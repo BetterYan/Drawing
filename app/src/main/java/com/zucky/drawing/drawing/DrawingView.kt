@@ -47,6 +47,7 @@ class DrawingView @JvmOverloads constructor(
                 if (drawingBitmap == null) {
                     initDrawingBitmap()
                 }
+                updateViewMatrix()
                 // 异步分析区域划分
                 analyzeRegionsAsync(value)
             } else {
@@ -162,17 +163,22 @@ class DrawingView @JvmOverloads constructor(
         if (drawingBitmap == null) {
             initDrawingBitmap()
         }
-        templateBitmap?.let { tmpl ->
-            val scaleX = w.toFloat() / tmpl.width
-            val scaleY = h.toFloat() / tmpl.height
-            val scale = minOf(scaleX, scaleY)
-            val dx = (w - tmpl.width * scale) / 2f
-            val dy = (h - tmpl.height * scale) / 2f
-            viewMatrix.reset()
-            viewMatrix.postScale(scale, scale)
-            viewMatrix.postTranslate(dx, dy)
-            viewMatrix.invert(invertMatrix)
-        }
+        updateViewMatrix()
+    }
+
+    /** 根据当前 View 尺寸和模板尺寸，重新计算缩放与居中矩阵 */
+    private fun updateViewMatrix() {
+        val tmpl = templateBitmap ?: return
+        if (width <= 0 || height <= 0) return
+        val scaleX = width.toFloat() / tmpl.width
+        val scaleY = height.toFloat() / tmpl.height
+        val scale = minOf(scaleX, scaleY)
+        val dx = (width - tmpl.width * scale) / 2f
+        val dy = (height - tmpl.height * scale) / 2f
+        viewMatrix.reset()
+        viewMatrix.postScale(scale, scale)
+        viewMatrix.postTranslate(dx, dy)
+        viewMatrix.invert(invertMatrix)
     }
 
     // ==================================================================
