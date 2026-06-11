@@ -40,6 +40,8 @@ class DrawingActivity : AppCompatActivity() {
         const val EXTRA_TEMPLATE_SOURCE_TYPE = "template_source_type"
         const val EXTRA_TEMPLATE_GENERATOR_ID = "template_generator_id"
         const val EXTRA_TEMPLATE_ASSET_PATH = "template_asset_path"
+        /** 线稿文件路径（从照片转换而来） */
+        const val EXTRA_TEMPLATE_FILE_PATH = "template_file_path"
     }
 
     private lateinit var binding: ActivityDrawingBinding
@@ -117,6 +119,17 @@ class DrawingActivity : AppCompatActivity() {
                                 val bm = BitmapFactory.decodeStream(stream)
                                 stream.close()
                                 bm
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else null
+                    }
+                    "lineart_file" -> {
+                        // 从照片转换得到的线稿文件
+                        val filePath = intent.getStringExtra(EXTRA_TEMPLATE_FILE_PATH)
+                        if (filePath != null) {
+                            try {
+                                BitmapFactory.decodeFile(filePath)
                             } catch (e: Exception) {
                                 null
                             }

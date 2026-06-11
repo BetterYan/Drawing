@@ -36,6 +36,30 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- 导入照片按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/kid_cream"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp">
+
+        <Button
+            android:id="@+id/btn_import_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/btn_kid_secondary"
+            android:minWidth="200dp"
+            android:paddingHorizontal="24dp"
+            android:text="@string/gallery_import_photo"
+            android:textColor="@color/kid_dark_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- 素材网格 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_templates"

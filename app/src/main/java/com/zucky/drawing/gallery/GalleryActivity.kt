@@ -1,6 +1,7 @@
 package com.zucky.drawing.gallery
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.zucky.drawing.TRANSITION_OPEN
 import com.zucky.drawing.TRANSITION_CLOSE
@@ -11,9 +12,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.zucky.drawing.R
 import com.zucky.drawing.databinding.ActivityGalleryBinding
 import com.zucky.drawing.drawing.DrawingActivity
+import com.zucky.drawing.lineart.LineArtActivity
 import com.zucky.drawing.model.Template
 import com.zucky.drawing.model.TemplateGenerator
 import com.zucky.drawing.model.TemplateSource
+import com.zucky.drawing.photo.PhotoPickerHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,12 +31,16 @@ class GalleryActivity : AppCompatActivity() {
     private lateinit var adapter: TemplateAdapter
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    /** 照片选择 & 相机拍摄 */
+    private lateinit var photoPickerHelper: PhotoPickerHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGalleryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupRecyclerView()
+        setupPhotoImport()
         loadTemplates()
 
         binding.btnBack.setOnClickListener {
@@ -51,6 +58,36 @@ class GalleryActivity : AppCompatActivity() {
             android.content.res.Configuration.ORIENTATION_LANDSCAPE) 5 else 3
         binding.rvTemplates.layoutManager = GridLayoutManager(this, spanCount)
         binding.rvTemplates.adapter = adapter
+    }
+
+    /**
+     * 初始化照片导入功能。
+     */
+    private fun setupPhotoImport() {
+        photoPickerHelper = PhotoPickerHelper(this)
+        photoPickerHelper.onPhotoSelected = { uri ->
+            // 照片选中后，跳转到线稿转换界面
+            navigateToLineArt(uri)
+        }
+
+        binding.btnImportPhoto.setOnClickListener {
+            photoPickerHelper.showSourceDialog()
+        }
+    }
+
+    /**
+     * 跳转到线稿转换界面。
+     */
+    private fun navigateToLineArt(uri: Uri) {
+        // 持久化 URI 权限
+        photoPickerHelper.persistUriPermission(uri)
+
+        val intent = Intent(this, LineArtActivity::class.java).apply {
+            putExtra(LineArtActivity.EXTRA_PHOTO_URI, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        applyTransition(TRANSITION_OPEN, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        startActivity(intent)
     }
 
     private fun loadTemplates() {

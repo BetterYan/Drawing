@@ -23,4 +23,21 @@
     <string name="region_lock_off_text">🔓 自由涂色</string>
     <string name="region_toggle_on">区域锁定已开启</string>
     <string name="region_toggle_off">区域锁定已关闭</string>
+
+    <!-- 照片导入 & 线稿转换 -->
+    <string name="gallery_import_photo">📷 导入照片</string>
+    <string name="photo_source_title">选择照片来源</string>
+    <string name="photo_source_gallery">🖼️ 从相册选择</string>
+    <string name="photo_source_camera">📷 拍照</string>
+    <string name="photo_camera_error">无法启动相机，请检查相机权限</string>
+    <string name="lineart_title">照片转线稿</string>
+    <string name="lineart_original_photo">原始照片</string>
+    <string name="lineart_btn_convert">✨ 转换为线稿</string>
+    <string name="lineart_btn_reselect">重新选择</string>
+    <string name="lineart_btn_start_coloring">开始涂色 →</string>
+    <string name="lineart_converting">正在转换中…</string>
+    <string name="lineart_complete">转换完成！</string>
+    <string name="lineart_result_preview">线稿预览</string>
+    <string name="lineart_detail_low">简略</string>
+    <string name="lineart_detail_high">精细</string>
 </resources>
