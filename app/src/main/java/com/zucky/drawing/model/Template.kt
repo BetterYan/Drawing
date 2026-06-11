@@ -80,20 +80,22 @@ object TemplateGenerator {
 
     /**
      * 生成指定 ID 的模板 Bitmap（纯线稿，用于 DrawingView 区域分析）
+     * @param width  画布宽度（像素）
+     * @param height 画布高度（像素）
      */
-    fun generateTemplate(generatorId: Int, size: Int = 1024): Bitmap {
-        return drawTemplateInternal(generatorId, size, withFill = false)
+    fun generateTemplate(generatorId: Int, width: Int = 1024, height: Int = 1024): Bitmap {
+        return drawTemplateInternal(generatorId, width, height, withFill = false)
     }
 
     /**
      * 生成指定 ID 的彩色预览 Bitmap（用于画廊缩略图展示）
      */
     fun generatePreview(generatorId: Int, size: Int = 256): Bitmap {
-        return drawTemplateInternal(generatorId, size, withFill = true)
+        return drawTemplateInternal(generatorId, size, size, withFill = true)
     }
 
-    private fun drawTemplateInternal(generatorId: Int, size: Int, withFill: Boolean): Bitmap {
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    private fun drawTemplateInternal(generatorId: Int, width: Int, height: Int, withFill: Boolean): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         // 白色背景
@@ -102,8 +104,10 @@ object TemplateGenerator {
         // 设置填充色
         currentFillColor = if (withFill) templateColors[generatorId] else null
 
-        val cx = size / 2f
-        val cy = size / 2f
+        // 使用较小维度的 80% 作为绘图比例基准，确保图案完整居中显示
+        val size = minOf(width, height) * 0.8f
+        val cx = width / 2f
+        val cy = height / 2f
         val margin = size * 0.15f
 
         when (generatorId) {

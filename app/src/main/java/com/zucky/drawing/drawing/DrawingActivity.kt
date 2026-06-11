@@ -61,7 +61,6 @@ class DrawingActivity : AppCompatActivity() {
         binding = ActivityDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        loadTemplate()
         setupColorPalette()
         setupToolButtons()
         setupBrushSize()
@@ -73,6 +72,25 @@ class DrawingActivity : AppCompatActivity() {
             binding.drawingView.visibleBottomOffset = binding.bottomToolbar.height
         }
 
+        // 等待布局完成后，获取可见绘制区域尺寸再加载模板
+        var templateLoaded = false
+        binding.root.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                v: View?, left: Int, top: Int, right: Int, bottom: Int,
+                oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
+            ) {
+                if (templateLoaded) return
+                val viewWidth = binding.drawingView.width
+                val viewHeight = binding.drawingView.height
+                if (viewWidth > 0 && viewHeight > 0) {
+                    templateLoaded = true
+                    binding.root.removeOnLayoutChangeListener(this)
+                    val drawAreaHeight = (viewHeight - binding.bottomToolbar.height).coerceAtLeast(1)
+                    loadTemplate(viewWidth, drawAreaHeight)
+                }
+            }
+        })
+
         // 拦截系统返回（含手势返回），弹出确认对话框
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -81,7 +99,7 @@ class DrawingActivity : AppCompatActivity() {
         })
     }
 
-    private fun loadTemplate() {
+    private fun loadTemplate(canvasWidth: Int, canvasHeight: Int) {
         val sourceType = intent.getStringExtra(EXTRA_TEMPLATE_SOURCE_TYPE) ?: "builtin"
 
         lifecycleScope.launch {
@@ -89,7 +107,7 @@ class DrawingActivity : AppCompatActivity() {
                 when (sourceType) {
                     "builtin" -> {
                         val generatorId = intent.getIntExtra(EXTRA_TEMPLATE_GENERATOR_ID, 0)
-                        TemplateGenerator.generateTemplate(generatorId)
+                        TemplateGenerator.generateTemplate(generatorId, canvasWidth, canvasHeight)
                     }
                     "asset" -> {
                         val assetPath = intent.getStringExtra(EXTRA_TEMPLATE_ASSET_PATH)
