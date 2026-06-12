@@ -13,19 +13,21 @@ import org.opencv.imgproc.Imgproc
 import kotlin.math.max
 
 /**
- * 基于 OpenCV 的线稿提取引擎。
+ * 基于 OpenCV 的线稿提取引擎（参数优化版）。
  *
- * 管线：
- * 1. 降采样到工作分辨率（768px）
- * 2. 灰度转换
- * 3. 双边滤波（保边去噪）
- * 4. 自适应阈值（提取主体轮廓）
- * 5. Canny 边缘检测（提取精细边缘）
- * 6. 合并两者
- * 7. 形态学闭运算（修复断线）
- * 8. 形态学开运算（去噪）
- * 9. 反色 → 白底黑线
- * 10. 升采样回原始分辨率
+ * 优化后的管线：
+ * 1. Bitmap → Mat（ARGB_8888 保证）
+ * 2. OpenCV resize 降采样（INTER_AREA 抗混叠）
+ * 3. 灰度转换（COLOR_RGB2GRAY，修复通道顺序）
+ * 4. CLAHE 对比度增强
+ * 5. 双边滤波（保边去噪，参数收紧）
+ * 6. 自适应阈值（主体轮廓）+ Canny（精细边缘）
+ * 7. 加权融合（addWeighted 0.6+0.4）+ 二值化
+ * 8. 形态学闭运算（修复断线）
+ * 9. 形态学开运算（去噪）
+ * 10. 去除小连通域（RETR_TREE 保留内部细节）
+ * 11. 反色 → 白底黑线
+ * 12. OpenCV resize 升采样（INTER_CUBIC）→ Bitmap
  */
 class OpenCVLineArtEngine : LineArtEngine {
 
@@ -45,10 +47,10 @@ class OpenCVLineArtEngine : LineArtEngine {
     private fun computeParams(level: Float): OpenCVParams {
         val l = level.coerceIn(0f, 1f)
         return OpenCVParams(
-            // 双边滤波
+            // 双边滤波（sigma 收紧，避免过度平滑）
             bilateralDiameter = (15 - l * 6).toInt().coerceIn(5, 15),
-            bilateralSigmaColor = (80 - l * 40).toDouble().coerceIn(20.0, 80.0),
-            bilateralSigmaSpace = (80 - l * 40).toDouble().coerceIn(20.0, 80.0),
+            bilateralSigmaColor = (60 - l * 30).toDouble().coerceIn(30.0, 60.0),
+            bilateralSigmaSpace = (60 - l * 30).toDouble().coerceIn(30.0, 60.0),
 
             // 自适应阈值
             adaptiveBlockSize = (41 - l * 20).toInt().coerceIn(11, 41).let {
@@ -93,55 +95,65 @@ class OpenCVLineArtEngine : LineArtEngine {
         val params = computeParams(detailLevel)
         onProgress?.invoke(0.05f)
 
+        val srcW = inputBitmap.width
+        val srcH = inputBitmap.height
+        val scaleRatio = computeScaleRatio(srcW, srcH, WORKING_MAX_DIM)
+        val workW = (srcW * scaleRatio).toInt().coerceAtLeast(1)
+        val workH = (srcH * scaleRatio).toInt().coerceAtLeast(1)
+
         // ── 防御：确保 Bitmap 可被 OpenCV lockPixels（非 HARDWARE / ARGB_8888） ──
-        // Android 10+ ImageDecoder 可能默认创建 HARDWARE Bitmap，OpenCV 无法 lockPixels
         val safeInput = ensureSoftwareBitmap(inputBitmap)
-
-        // ── Step 1: 降采样 ──
-        val (workingBitmap, scaleRatio) = downsampleBitmap(safeInput, WORKING_MAX_DIM)
-        onProgress?.invoke(0.15f)
-
-        // 如果 safeInput 是复制的中间产物，且不是 workingBitmap 本身，则回收
-        if (safeInput !== inputBitmap && safeInput !== workingBitmap) {
-            safeInput.recycle()
-        }
-
-        val w = workingBitmap.width
-        val h = workingBitmap.height
 
         // ── OpenCV 处理在 Mat 上进行 ──
         var src = Mat()
+        var resized = Mat()
         var gray = Mat()
+        var enhanced = Mat()
         var filtered = Mat()
         var adaptive = Mat()
         var canny = Mat()
         var combined = Mat()
+        var binarized = Mat()
         var closed = Mat()
         var opened = Mat()
         var resultMat = Mat()
+        var upscaled = Mat()
 
         try {
-            // Step 2: Bitmap -> Mat
-            Utils.bitmapToMat(workingBitmap, src)
-            // 释放降采样产生的中间 Bitmap（注意：如果 downsampleBitmap 返回的是 safeInput 本身，
-            // 则上面的 alreadyRecycled 逻辑已处理；这里只回收明确新创建的 workingBitmap）
-            if (workingBitmap !== safeInput) workingBitmap.recycle()
-            onProgress?.invoke(0.2f)
+            // Step 1: Bitmap -> Mat
+            Utils.bitmapToMat(safeInput, src)
+            if (safeInput !== inputBitmap) safeInput.recycle()
+            onProgress?.invoke(0.1f)
 
-            // Step 3: 灰度转换
-            Imgproc.cvtColor(src, gray, Imgproc.COLOR_BGR2GRAY)
+            // Step 2: 降采样（INTER_AREA 抗混叠，优于 Android 的双线性插值）
+            if (scaleRatio < 1.0) {
+                Imgproc.resize(src, resized, Size(workW.toDouble(), workH.toDouble()),
+                    0.0, 0.0, Imgproc.INTER_AREA)
+            } else {
+                src.copyTo(resized)
+            }
+            onProgress?.invoke(0.15f)
+
+            // Step 3: 灰度转换（Android Bitmap 是 RGB 顺序，不是 BGR）
+            Imgproc.cvtColor(resized, gray, Imgproc.COLOR_RGB2GRAY)
+            onProgress?.invoke(0.25f)
+
+            // Step 4: CLAHE 对比度增强（自适应直方图均衡化）
+            val clahe = Imgproc.createCLAHE(2.0, Size(8.0, 8.0))
+            clahe.apply(gray, enhanced)
+            clahe.collectGarbage()
             onProgress?.invoke(0.3f)
 
-            // Step 4: 双边滤波（保边去噪）
+            // Step 5: 双边滤波（保边去噪）
             Imgproc.bilateralFilter(
-                gray, filtered,
+                enhanced, filtered,
                 params.bilateralDiameter,
                 params.bilateralSigmaColor,
                 params.bilateralSigmaSpace
             )
             onProgress?.invoke(0.4f)
 
-            // Step 5: 自适应阈值（提取主体轮廓）
+            // Step 6: 自适应阈值（提取主体轮廓）
             Imgproc.adaptiveThreshold(
                 filtered, adaptive,
                 255.0,
@@ -150,34 +162,38 @@ class OpenCVLineArtEngine : LineArtEngine {
                 params.adaptiveBlockSize,
                 params.adaptiveC
             )
-            onProgress?.invoke(0.55f)
+            onProgress?.invoke(0.5f)
 
-            // Step 6: Canny 边缘检测（提取精细边缘）
+            // Step 7: Canny 边缘检测（提取精细边缘）
             Imgproc.Canny(
                 filtered, canny,
                 params.cannyThreshold1,
                 params.cannyThreshold2
             )
+            onProgress?.invoke(0.55f)
+
+            // Step 8: 加权融合（替代 bitwise_or，减少噪声叠加）
+            Core.addWeighted(adaptive, 0.6, canny, 0.4, 0.0, combined)
+            onProgress?.invoke(0.6f)
+
+            // Step 9: 融合后整体二值化（确保纯黑白）
+            Imgproc.threshold(combined, binarized, 127.0, 255.0, Imgproc.THRESH_BINARY)
             onProgress?.invoke(0.65f)
 
-            // Step 7: 合并两者（取并集）
-            Core.bitwise_or(adaptive, canny, combined)
-            onProgress?.invoke(0.7f)
-
-            // Step 8: 形态学闭运算（修复断线）
+            // Step 10: 形态学闭运算（修复断线）
             if (params.morphCloseSize > 0) {
                 val closeKernel = Imgproc.getStructuringElement(
                     Imgproc.MORPH_ELLIPSE,
                     Size(params.morphCloseSize.toDouble(), params.morphCloseSize.toDouble())
                 )
-                Imgproc.morphologyEx(combined, closed, Imgproc.MORPH_CLOSE, closeKernel)
+                Imgproc.morphologyEx(binarized, closed, Imgproc.MORPH_CLOSE, closeKernel)
                 closeKernel.release()
             } else {
-                combined.copyTo(closed)
+                binarized.copyTo(closed)
             }
-            onProgress?.invoke(0.75f)
+            onProgress?.invoke(0.7f)
 
-            // Step 9: 形态学开运算（去噪）
+            // Step 11: 形态学开运算（去噪）
             if (params.morphOpenSize > 0) {
                 val openKernel = Imgproc.getStructuringElement(
                     Imgproc.MORPH_ELLIPSE,
@@ -188,27 +204,32 @@ class OpenCVLineArtEngine : LineArtEngine {
             } else {
                 closed.copyTo(opened)
             }
+            onProgress?.invoke(0.75f)
+
+            // Step 12: 去除小连通域（RETR_TREE 保留内部孔洞细节）
+            removeSmallComponents(opened, resultMat, params.minComponentArea)
             onProgress?.invoke(0.8f)
 
-            // Step 10: 去除小连通域
-            removeSmallComponents(opened, resultMat, params.minComponentArea)
+            // Step 13: 反色前再次确保纯黑白
+            Imgproc.threshold(resultMat, resultMat, 127.0, 255.0, Imgproc.THRESH_BINARY)
             onProgress?.invoke(0.85f)
 
-            // Step 11: 反色 → 白底黑线（当前是黑底白线）
+            // Step 14: 反色 → 白底黑线
             Core.bitwise_not(resultMat, resultMat)
             onProgress?.invoke(0.9f)
 
-            // Step 12: Mat -> Bitmap
-            val lineArt = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-            Utils.matToBitmap(resultMat, lineArt)
-
-            // Step 13: 升采样回原始分辨率
-            val finalBitmap = if (scaleRatio < 1f) {
-                Bitmap.createScaledBitmap(lineArt, inputBitmap.width, inputBitmap.height, true)
-                    .also { lineArt.recycle() }
+            // Step 15: 升采样回原分辨率（INTER_CUBIC 质量优于双线性）
+            if (scaleRatio < 1.0) {
+                Imgproc.resize(resultMat, upscaled, Size(srcW.toDouble(), srcH.toDouble()),
+                    0.0, 0.0, Imgproc.INTER_CUBIC)
             } else {
-                lineArt
+                resultMat.copyTo(upscaled)
             }
+            onProgress?.invoke(0.95f)
+
+            // Step 16: Mat -> Bitmap
+            val finalBitmap = Bitmap.createBitmap(srcW, srcH, Bitmap.Config.ARGB_8888)
+            Utils.matToBitmap(upscaled, finalBitmap)
 
             onProgress?.invoke(1.0f)
             return finalBitmap
@@ -216,14 +237,29 @@ class OpenCVLineArtEngine : LineArtEngine {
         } finally {
             // 确保所有 Mat 被释放，防止 native 内存泄漏
             src.release()
+            resized.release()
             gray.release()
+            enhanced.release()
             filtered.release()
             adaptive.release()
             canny.release()
             combined.release()
+            binarized.release()
             closed.release()
             opened.release()
             resultMat.release()
+            upscaled.release()
+        }
+    }
+
+    /**
+     * 计算降采样比例。
+     */
+    private fun computeScaleRatio(width: Int, height: Int, maxDim: Int): Double {
+        return if (width <= maxDim && height <= maxDim) {
+            1.0
+        } else {
+            maxDim.toDouble() / max(width, height)
         }
     }
 
@@ -249,30 +285,15 @@ class OpenCVLineArtEngine : LineArtEngine {
     }
 
     /**
-     * 等比降采样，返回 (Bitmap, scaleRatio)。
-     * 如果无需降采样，返回原 Bitmap 和 1.0f。
-     */
-    private fun downsampleBitmap(input: Bitmap, maxDim: Int): Pair<Bitmap, Float> {
-        val w = input.width
-        val h = input.height
-        if (w <= maxDim && h <= maxDim) return input to 1f
-
-        val scale = maxDim.toFloat() / max(w, h)
-        val newW = (w * scale).toInt().coerceAtLeast(1)
-        val newH = (h * scale).toInt().coerceAtLeast(1)
-        val scaled = Bitmap.createScaledBitmap(input, newW, newH, true)
-        return scaled to scale
-    }
-
-    /**
      * 去除面积小于 minArea 的连通域（基于轮廓查找）。
+     * 使用 RETR_TREE 保留内部孔洞层次结构（如眼睛、嘴等内部细节）。
      */
     private fun removeSmallComponents(src: Mat, dst: Mat, minArea: Int) {
         val contours = ArrayList<MatOfPoint>()
         val hierarchy = Mat()
         Imgproc.findContours(
             src, contours, hierarchy,
-            Imgproc.RETR_EXTERNAL,
+            Imgproc.RETR_TREE,
             Imgproc.CHAIN_APPROX_SIMPLE
         )
 
