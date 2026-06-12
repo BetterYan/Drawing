@@ -7,6 +7,7 @@ import com.zucky.drawing.TRANSITION_OPEN
 import com.zucky.drawing.TRANSITION_CLOSE
 import android.widget.Toast
 import com.zucky.drawing.applyTransition
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.zucky.drawing.R
@@ -62,17 +63,52 @@ class GalleryActivity : AppCompatActivity() {
 
     /**
      * 初始化照片导入功能。
+     * 相册选择 → 线稿转换；相机拍摄 → 直接绘图。
      */
     private fun setupPhotoImport() {
         photoPickerHelper = PhotoPickerHelper(this)
-        photoPickerHelper.onPhotoSelected = { uri ->
-            // 照片选中后，跳转到线稿转换界面
-            navigateToLineArt(uri)
-        }
 
         binding.btnImportPhoto.setOnClickListener {
-            photoPickerHelper.showSourceDialog()
+            showPhotoSourceDialog()
         }
+    }
+
+    /**
+     * 显示照片来源选择对话框。
+     */
+    private fun showPhotoSourceDialog() {
+        val options = arrayOf(
+            getString(R.string.photo_source_gallery),
+            getString(R.string.photo_source_camera)
+        )
+        AlertDialog.Builder(this)
+            .setTitle(R.string.photo_source_title)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        // 从相册选择：走线稿转换流程
+                        photoPickerHelper.onPhotoSelected = { uri ->
+                            navigateToLineArt(uri)
+                        }
+                        photoPickerHelper.pickFromGallery()
+                    }
+                    1 -> {
+                        // 相机拍摄：和相册一样进入线稿转换页面
+                        photoPickerHelper.onPhotoSelected = { uri ->
+                            navigateToLineArt(uri)
+                        }
+                        try {
+                            photoPickerHelper.takePhoto()
+                        } catch (e: IOException) {
+                            AlertDialog.Builder(this)
+                                .setMessage(R.string.photo_camera_error)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show()
+                        }
+                    }
+                }
+            }
+            .show()
     }
 
     /**

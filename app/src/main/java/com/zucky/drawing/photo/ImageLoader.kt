@@ -64,6 +64,8 @@ object ImageLoader {
                     (srcH * scale).toInt().coerceAtLeast(1)
                 )
             }
+            // 强制使用软件内存分配，避免 HARDWARE 配置导致 OpenCV lockPixels 失败
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             decoder.memorySizePolicy = ImageDecoder.MEMORY_POLICY_LOW_RAM
         }
     }

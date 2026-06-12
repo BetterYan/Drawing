@@ -42,6 +42,10 @@ class DrawingActivity : AppCompatActivity() {
         const val EXTRA_TEMPLATE_ASSET_PATH = "template_asset_path"
         /** 线稿文件路径（从照片转换而来） */
         const val EXTRA_TEMPLATE_FILE_PATH = "template_file_path"
+        /** 照片 URI（直接使用照片作为模板） */
+        const val EXTRA_PHOTO_URI = "photo_uri"
+        /** 禁用区域锁定（用于未转线稿的原图） */
+        const val EXTRA_DISABLE_REGION_LOCK = "disable_region_lock"
     }
 
     private lateinit var binding: ActivityDrawingBinding
@@ -130,6 +134,20 @@ class DrawingActivity : AppCompatActivity() {
                         if (filePath != null) {
                             try {
                                 BitmapFactory.decodeFile(filePath)
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else null
+                    }
+                    "photo_uri" -> {
+                        // 直接使用拍摄的照片作为模板
+                        val uriString = intent.getStringExtra(EXTRA_PHOTO_URI)
+                        if (uriString != null) {
+                            try {
+                                val uri = android.net.Uri.parse(uriString)
+                                com.zucky.drawing.photo.ImageLoader.decodeBitmapFromUri(
+                                    contentResolver, uri, canvasWidth, canvasHeight
+                                )
                             } catch (e: Exception) {
                                 null
                             }
@@ -310,12 +328,17 @@ class DrawingActivity : AppCompatActivity() {
     }
 
     /**
-     * 区域锁定切换按钮（默认开启）。
+     * 区域锁定切换按钮（默认开启，未转线稿的原图默认关闭）。
      * 按钮样式：绿色药丸 = 锁定 / 橙色药丸 = 自由涂色。
      */
     private fun setupRegionLock() {
         val lockBtn = binding.btnRegionLock
         val drawingView = binding.drawingView
+
+        // 未转线稿的原图：默认关闭区域锁定
+        if (intent.getBooleanExtra(EXTRA_DISABLE_REGION_LOCK, false)) {
+            drawingView.constrainToRegion = false
+        }
 
         fun updateLockUI() {
             if (drawingView.constrainToRegion) {

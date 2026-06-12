@@ -26,6 +26,7 @@
 
     <!-- 照片导入 & 线稿转换 -->
     <string name="gallery_import_photo">📷 导入照片</string>
+    <string name="gallery_my_photo">我的照片</string>
     <string name="photo_source_title">选择照片来源</string>
     <string name="photo_source_gallery">🖼️ 从相册选择</string>
     <string name="photo_source_camera">📷 拍照</string>
