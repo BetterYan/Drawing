@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.opencv.android.OpenCVLoader
 import java.io.File
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import java.io.FileOutputStream
 
 /**
@@ -54,6 +56,9 @@ class LineArtActivity : AppCompatActivity() {
     /** 是否正在转换 */
     private var isConverting = false
 
+    /** 当前选中的引擎名称 */
+    private var currentEngineName: String = "OpenCV"
+
     /** 保存的线稿临时文件路径（传递给 DrawingActivity） */
     private var savedLineArtPath: String? = null
 
@@ -62,16 +67,29 @@ class LineArtActivity : AppCompatActivity() {
         binding = ActivityLineartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 初始化引擎（使用 OpenCV）
-        engine = createBestAvailableEngine()
+        // 初始化引擎
+        engine = createEngine(currentEngineName)
 
         setupButtons()
+        setupEngineSelector()
         loadPhoto()
 
         // 恢复状态（配置变更后重建）
         savedInstanceState?.let { saved ->
             detailLevel = saved.getFloat("detail_level", 0.5f)
+            currentEngineName = saved.getString("current_engine", "OpenCV")
             binding.sbDetail.progress = (detailLevel * 100).toInt()
+
+            // 恢复 Spinner 选择
+            val engineArray = resources.getStringArray(com.zucky.drawing.R.array.lineart_engines)
+            val engineIndex = engineArray.indexOf(currentEngineName)
+            if (engineIndex >= 0) {
+                binding.spinnerEngine.setSelection(engineIndex)
+            }
+
+            // 重建引擎（OpenCV 初始化在 createEngine 中完成）
+            engine = createEngine(currentEngineName)
+
             savedLineArtPath = saved.getString("saved_lineart_path")
             // 如果之前有保存的线稿文件，尝试恢复
             val path = savedLineArtPath
@@ -93,10 +111,10 @@ class LineArtActivity : AppCompatActivity() {
     }
 
     /**
-     * 创建 OpenCV 线稿引擎。
+     * 创建指定名称的线稿引擎。
      * OpenCV 初始化在首次调用时自动进行。
      */
-    private fun createBestAvailableEngine(): LineArtEngine {
+    private fun createEngine(name: String): LineArtEngine {
         // OpenCVLoader.initLocal() 是幂等的，可安全多次调用
         val success = OpenCVLoader.initLocal()
         if (!success) {
@@ -107,8 +125,10 @@ class LineArtActivity : AppCompatActivity() {
                 throw IllegalStateException("OpenCV 初始化失败，无法使用线稿功能")
             }
         }
-        Toast.makeText(this, "使用 OpenCV 引擎", Toast.LENGTH_SHORT).show()
-        return OpenCVLineArtEngine()
+        return when (name) {
+            "XDoG" -> XDoGLineArtEngine()
+            else -> OpenCVLineArtEngine()
+        }
     }
 
     private fun setupButtons() {
@@ -148,6 +168,48 @@ class LineArtActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    /**
+     * 设置引擎选择器 Spinner。
+     */
+    private fun setupEngineSelector() {
+        val adapter = ArrayAdapter.createFromResource(
+            this,
+            com.zucky.drawing.R.array.lineart_engines,
+            android.R.layout.simple_spinner_item
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerEngine.adapter = adapter
+
+        binding.spinnerEngine.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: android.view.View?,
+                position: Int,
+                id: Long
+            ) {
+                val selectedName = parent?.getItemAtPosition(position) as String
+                if (selectedName == currentEngineName) return
+
+                currentEngineName = selectedName
+                engine = createEngine(selectedName)
+                Toast.makeText(this@LineArtActivity, "使用 ${engine.name} 引擎", Toast.LENGTH_SHORT).show()
+
+                // XDoG 引擎默认使用较低细节级别（滑块八分之一处 ≈ 0.125），避免过度碎片化
+                if (selectedName == "XDoG") {
+                    detailLevel = 0.125f
+                    binding.sbDetail.progress = (detailLevel * 100).toInt()
+                }
+
+                // 如果已经转换过，自动重新转换
+                if (lineArtBitmap != null && !isConverting && originalBitmap != null) {
+                    startConversion()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     /**
@@ -311,6 +373,7 @@ class LineArtActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putFloat("detail_level", detailLevel)
+        outState.putString("current_engine", currentEngineName)
         outState.putString("saved_lineart_path", savedLineArtPath)
     }
 

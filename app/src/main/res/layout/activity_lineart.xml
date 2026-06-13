@@ -68,19 +68,33 @@
                 android:maxHeight="240dp"
                 android:scaleType="centerCrop" />
 
-            <!-- 转换按钮 -->
-            <Button
-                android:id="@+id/btn_convert"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+            <!-- 转换按钮和引擎选择器 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/btn_kid_primary"
-                android:minWidth="200dp"
-                android:paddingHorizontal="32dp"
-                android:text="@string/lineart_btn_convert"
-                android:textColor="@color/kid_white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_convert"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/btn_kid_primary"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/lineart_btn_convert"
+                    android:textColor="@color/kid_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinner_engine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_template_card" />
+            </LinearLayout>
 
             <!-- 进度条 -->
             <LinearLayout

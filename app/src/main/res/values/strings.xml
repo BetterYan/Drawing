@@ -41,4 +41,10 @@
     <string name="lineart_result_preview">线稿预览</string>
     <string name="lineart_detail_low">简略</string>
     <string name="lineart_detail_high">精细</string>
+
+    <!-- 线稿引擎选择 -->
+    <string-array name="lineart_engines">
+        <item>OpenCV</item>
+        <item>XDoG</item>
+    </string-array>
 </resources>
