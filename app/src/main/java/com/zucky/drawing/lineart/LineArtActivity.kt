@@ -115,19 +115,30 @@ class LineArtActivity : AppCompatActivity() {
      * OpenCV 初始化在首次调用时自动进行。
      */
     private fun createEngine(name: String): LineArtEngine {
-        // OpenCVLoader.initLocal() 是幂等的，可安全多次调用
+        return when (name) {
+            "XDoG" -> {
+                ensureOpenCvInitialized()
+                XDoGLineArtEngine()
+            }
+            "PiDiNet" -> PiDiNetLineArtEngine(this)
+            else -> {
+                ensureOpenCvInitialized()
+                OpenCVLineArtEngine()
+            }
+        }
+    }
+
+    /**
+     * 确保 OpenCV 已初始化（用于 OpenCV 和 XDoG 引擎）。
+     */
+    private fun ensureOpenCvInitialized() {
         val success = OpenCVLoader.initLocal()
         if (!success) {
             Toast.makeText(this, "OpenCV 初始化失败，尝试重新加载...", Toast.LENGTH_SHORT).show()
-            // 如果失败，再次尝试一次
             val retry = OpenCVLoader.initLocal()
             if (!retry) {
                 throw IllegalStateException("OpenCV 初始化失败，无法使用线稿功能")
             }
-        }
-        return when (name) {
-            "XDoG" -> XDoGLineArtEngine()
-            else -> OpenCVLineArtEngine()
         }
     }
 
@@ -196,10 +207,18 @@ class LineArtActivity : AppCompatActivity() {
                 engine = createEngine(selectedName)
                 Toast.makeText(this@LineArtActivity, "使用 ${engine.name} 引擎", Toast.LENGTH_SHORT).show()
 
-                // XDoG 引擎默认使用较低细节级别（滑块八分之一处 ≈ 0.125），避免过度碎片化
-                if (selectedName == "XDoG") {
-                    detailLevel = 0.125f
-                    binding.sbDetail.progress = (detailLevel * 100).toInt()
+                // 不同引擎的默认细节级别
+                when (selectedName) {
+                    // XDoG 默认较低级别，避免过度碎片化
+                    "XDoG" -> {
+                        detailLevel = 0.125f
+                        binding.sbDetail.progress = (detailLevel * 100).toInt()
+                    }
+                    // PiDiNet 默认中等级别，深度学习模型对阈值敏感
+                    "PiDiNet" -> {
+                        detailLevel = 0.5f
+                        binding.sbDetail.progress = (detailLevel * 100).toInt()
+                    }
                 }
 
                 // 如果已经转换过，自动重新转换
