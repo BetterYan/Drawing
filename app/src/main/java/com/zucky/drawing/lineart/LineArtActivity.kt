@@ -216,7 +216,7 @@ class LineArtActivity : AppCompatActivity() {
                     }
                     // PiDiNet 默认中等级别，深度学习模型对阈值敏感
                     "PiDiNet" -> {
-                        detailLevel = 0.5f
+                        detailLevel = 0.3f
                         binding.sbDetail.progress = (detailLevel * 100).toInt()
                     }
                 }
