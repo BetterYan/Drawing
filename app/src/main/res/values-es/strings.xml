@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dibujo Bebé</string>
+    <string name="btn_start_draw">Empezar a Dibujar 🎨</string>
+    <string name="splash_message">¿Listo para dibujar?</string>
+    <string name="main_title">Dibujo Bebé</string>
+    <string name="main_subtitle">¡Elige un dibujo y empieza a colorear!</string>
+    <string name="gallery_title">Elegir Dibujo</string>
+    <string name="drawing_title">Colorear</string>
+    <string name="tool_brush">Pincel</string>
+    <string name="tool_eraser">Borrador</string>
+    <string name="tool_fill">Rellenar</string>
+    <string name="tool_undo">Deshacer</string>
+    <string name="tool_redo">Rehacer</string>
+    <string name="tool_clear">Limpiar</string>
+    <string name="btn_save">Guardar en Galería</string>
+    <string name="btn_discard">Descartar</string>
+    <string name="save_success">¡Guardado en la Galería!</string>
+    <string name="save_failed">Error al guardar, inténtalo de nuevo</string>
+    <string name="discard_confirm">¿Seguro que quieres descartar?</string>
+    <string name="no_template">No se encontraron plantillas. Agrega imágenes a la carpeta assets/templates</string>
+    <string name="region_lock_on_text">🔒 Colorear en área</string>
+    <string name="region_lock_off_text">🔓 Colorear libremente</string>
+    <string name="region_toggle_on">Bloqueo de área activado</string>
+    <string name="region_toggle_off">Bloqueo de área desactivado</string>
+
+    <string name="gallery_import_photo">📷 Importar Foto</string>
+    <string name="gallery_my_photo">Mis Fotos</string>
+    <string name="photo_source_title">Elegir fuente de foto</string>
+    <string name="photo_source_gallery">🖼️ De la Galería</string>
+    <string name="photo_source_camera">📷 Tomar Foto</string>
+    <string name="photo_camera_error">No se puede iniciar la cámara, verifica los permisos</string>
+    <string name="lineart_title">Foto a Dibujo</string>
+    <string name="lineart_original_photo">Foto Original</string>
+    <string name="lineart_btn_convert">✨ Convertir a Dibujo</string>
+    <string name="lineart_btn_reselect">Volver a Elegir</string>
+    <string name="lineart_btn_start_coloring">Empezar a Colorear →</string>
+    <string name="lineart_converting">Convirtiendo…</string>
+    <string name="lineart_complete">¡Conversión completada!</string>
+    <string name="lineart_result_preview">Vista previa</string>
+    <string name="lineart_detail_low">Bajo</string>
+    <string name="lineart_detail_high">Alto</string>
+
+    <string-array name="lineart_engines">
+        <item>Normal</item>
+        <item>Fino</item>
+        <item>Experto</item>
+    </string-array>
+    <string name="lineart_engine_toast">Motor: %s</string>
+    <string name="template_star">Estrella</string>
+    <string name="template_heart">Corazón</string>
+    <string name="template_flower">Flor</string>
+    <string name="template_house">Casa</string>
+    <string name="template_cat">Gato</string>
+    <string name="template_fish">Pez</string>
+    <string name="template_butterfly">Mariposa</string>
+    <string name="template_sun">Sol</string>
+    <string name="template_moon">Luna</string>
+    <string name="template_icecream">Helado</string>
+    <string name="template_tree">Árbol</string>
+    <string name="template_car">Coche</string>
+    <string name="dialog_clear_title">Limpiar lienzo</string>
+    <string name="dialog_clear_message">¿Seguro que quieres borrar todos los dibujos?</string>
+    <string name="dialog_confirm">Confirmar</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_discard_title">Descartar dibujo</string>
+    <string name="dialog_discard_confirm">Descartar</string>
+    <string name="dialog_discard_continue">Seguir dibujando</string>
+    <string name="toast_load_failed">Error al cargar la plantilla</string>
+    <string name="toast_save_failed">Error al guardar</string>
+    <string name="template_my_lineart">Mi dibujo</string>
+    <string name="template_my_photo">Mi foto</string>
+    <string name="toast_photo_not_loaded">Foto no cargada</string>
+    <string name="toast_save_photo_failed">Error al guardar la foto</string>
+    <string name="language_dialog_title">Seleccionar idioma</string>
+</resources>

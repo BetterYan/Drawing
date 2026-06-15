@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Рисовалка для малышей</string>
+    <string name="btn_start_draw">Начать рисовать 🎨</string>
+    <string name="splash_message">Готовы рисовать?</string>
+    <string name="main_title">Рисовалка для малышей</string>
+    <string name="main_subtitle">Выберите рисунок и начните раскрашивать!</string>
+    <string name="gallery_title">Выбор рисунка</string>
+    <string name="drawing_title">Раскраска</string>
+    <string name="tool_brush">Кисть</string>
+    <string name="tool_eraser">Ластик</string>
+    <string name="tool_fill">Заливка</string>
+    <string name="tool_undo">Отменить</string>
+    <string name="tool_redo">Повторить</string>
+    <string name="tool_clear">Очистить</string>
+    <string name="btn_save">Сохранить в галерею</string>
+    <string name="btn_discard">Отменить</string>
+    <string name="save_success">Сохранено в галерею!</string>
+    <string name="save_failed">Не удалось сохранить, попробуйте снова</string>
+    <string name="discard_confirm">Вы уверены, что хотите отменить?</string>
+    <string name="no_template">Шаблоны не найдены. Добавьте изображения в папку assets/templates</string>
+    <string name="region_lock_on_text">🔒 Раскраска в области</string>
+    <string name="region_lock_off_text">🔓 Свободная раскраска</string>
+    <string name="region_toggle_on">Блокировка области включена</string>
+    <string name="region_toggle_off">Блокировка области выключена</string>
+
+    <string name="gallery_import_photo">📷 Импорт фото</string>
+    <string name="gallery_my_photo">Мои фото</string>
+    <string name="photo_source_title">Выберите источник фото</string>
+    <string name="photo_source_gallery">🖼️ Из галереи</string>
+    <string name="photo_source_camera">📷 Сделать фото</string>
+    <string name="photo_camera_error">Невозможно запустить камеру, проверьте разрешение</string>
+    <string name="lineart_title">Фото в контурный рисунок</string>
+    <string name="lineart_original_photo">Оригинальное фото</string>
+    <string name="lineart_btn_convert">✨ Конвертировать</string>
+    <string name="lineart_btn_reselect">Выбрать другое</string>
+    <string name="lineart_btn_start_coloring">Начать раскраску →</string>
+    <string name="lineart_converting">Конвертация…</string>
+    <string name="lineart_complete">Конвертация завершена!</string>
+    <string name="lineart_result_preview">Предпросмотр</string>
+    <string name="lineart_detail_low">Низкая</string>
+    <string name="lineart_detail_high">Высокая</string>
+
+    <string-array name="lineart_engines">
+        <item>Обычный</item>
+        <item>Тонкий</item>
+        <item>Эксперт</item>
+    </string-array>
+    <string name="lineart_engine_toast">Движок: %s</string>
+    <string name="template_star">Звезда</string>
+    <string name="template_heart">Сердце</string>
+    <string name="template_flower">Цветок</string>
+    <string name="template_house">Дом</string>
+    <string name="template_cat">Кот</string>
+    <string name="template_fish">Рыбка</string>
+    <string name="template_butterfly">Бабочка</string>
+    <string name="template_sun">Солнце</string>
+    <string name="template_moon">Луна</string>
+    <string name="template_icecream">Мороженое</string>
+    <string name="template_tree">Дерево</string>
+    <string name="template_car">Машина</string>
+    <string name="dialog_clear_title">Очистить холст</string>
+    <string name="dialog_clear_message">Вы уверены, что хотите очистить все рисунки?</string>
+    <string name="dialog_confirm">Подтвердить</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_discard_title">Отменить рисунок</string>
+    <string name="dialog_discard_confirm">Отменить</string>
+    <string name="dialog_discard_continue">Продолжить рисование</string>
+    <string name="toast_load_failed">Не удалось загрузить шаблон</string>
+    <string name="toast_save_failed">Не удалось сохранить</string>
+    <string name="template_my_lineart">Мой контурный рисунок</string>
+    <string name="template_my_photo">Моё фото</string>
+    <string name="toast_photo_not_loaded">Фото не загружено</string>
+    <string name="toast_save_photo_failed">Не удалось сохранить фото</string>
+    <string name="language_dialog_title">Выбрать язык</string>
+</resources>

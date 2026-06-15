@@ -78,11 +78,27 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
+        <!-- 语言切换按钮 -->
+        <TextView
+            android:id="@+id/btn_language"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_language_bg"
+            android:gravity="center"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="🌐 English"
+            android:textColor="@color/kid_light_text"
+            android:textSize="16sp"
+            android:clickable="true"
+            android:focusable="true" />
+
         <!-- 底部装饰 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:alpha="0.4"
             android:text="🖍️ ✏️ 🖌️"
             android:textSize="24sp" />

@@ -1,51 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">宝贝画画</string>
-    <string name="btn_start_draw">开始绘画 🎨</string>
-    <string name="splash_message">准备好画画了吗？</string>
-    <string name="main_title">宝贝画画</string>
-    <string name="main_subtitle">选一个喜欢的图案开始涂色吧！</string>
-    <string name="gallery_title">选择图案</string>
-    <string name="drawing_title">涂色画画</string>
-    <string name="tool_brush">画笔</string>
-    <string name="tool_eraser">橡皮擦</string>
-    <string name="tool_fill">填充</string>
-    <string name="tool_undo">撤销</string>
-    <string name="tool_redo">重做</string>
-    <string name="tool_clear">清空</string>
-    <string name="btn_save">保存到相册</string>
-    <string name="btn_discard">放弃</string>
-    <string name="save_success">已保存到相册！</string>
-    <string name="save_failed">保存失败，请重试</string>
-    <string name="discard_confirm">确定要放弃当前绘画吗？</string>
-    <string name="no_template">没有找到素材，请在 assets/templates 文件夹中添加图片</string>
-    <string name="region_lock_on_text">🔒 区域内涂色</string>
-    <string name="region_lock_off_text">🔓 自由涂色</string>
-    <string name="region_toggle_on">区域锁定已开启</string>
-    <string name="region_toggle_off">区域锁定已关闭</string>
+    <string name="app_name">Baby Drawing</string>
+    <string name="btn_start_draw">Start Drawing 🎨</string>
+    <string name="splash_message">Ready to draw?</string>
+    <string name="main_title">Baby Drawing</string>
+    <string name="main_subtitle">Choose a pattern and start coloring!</string>
+    <string name="gallery_title">Choose Pattern</string>
+    <string name="drawing_title">Coloring</string>
+    <string name="tool_brush">Brush</string>
+    <string name="tool_eraser">Eraser</string>
+    <string name="tool_fill">Fill</string>
+    <string name="tool_undo">Undo</string>
+    <string name="tool_redo">Redo</string>
+    <string name="tool_clear">Clear</string>
+    <string name="btn_save">Save to Gallery</string>
+    <string name="btn_discard">Discard</string>
+    <string name="save_success">Saved to Gallery!</string>
+    <string name="save_failed">Save failed, please try again</string>
+    <string name="discard_confirm">Are you sure you want to discard?</string>
+    <string name="no_template">No templates found. Please add images to assets/templates folder</string>
+    <string name="region_lock_on_text">🔒 Region Lock On</string>
+    <string name="region_lock_off_text">🔓 Region Lock Off</string>
+    <string name="region_toggle_on">Region lock enabled</string>
+    <string name="region_toggle_off">Region lock disabled</string>
 
-    <!-- 照片导入 & 线稿转换 -->
-    <string name="gallery_import_photo">📷 导入照片</string>
-    <string name="gallery_my_photo">我的照片</string>
-    <string name="photo_source_title">选择照片来源</string>
-    <string name="photo_source_gallery">🖼️ 从相册选择</string>
-    <string name="photo_source_camera">📷 拍照</string>
-    <string name="photo_camera_error">无法启动相机，请检查相机权限</string>
-    <string name="lineart_title">照片转线稿</string>
-    <string name="lineart_original_photo">原始照片</string>
-    <string name="lineart_btn_convert">✨ 转换为线稿</string>
-    <string name="lineart_btn_reselect">重新选择</string>
-    <string name="lineart_btn_start_coloring">开始涂色 →</string>
-    <string name="lineart_converting">正在转换中…</string>
-    <string name="lineart_complete">转换完成！</string>
-    <string name="lineart_result_preview">线稿预览</string>
-    <string name="lineart_detail_low">简略</string>
-    <string name="lineart_detail_high">精细</string>
+    <!-- Photo import & line art conversion -->
+    <string name="gallery_import_photo">📷 Import Photo</string>
+    <string name="gallery_my_photo">My Photos</string>
+    <string name="photo_source_title">Choose Photo Source</string>
+    <string name="photo_source_gallery">🖼️ From Gallery</string>
+    <string name="photo_source_camera">📷 Take Photo</string>
+    <string name="photo_camera_error">Cannot start camera, please check camera permission</string>
+    <string name="lineart_title">Photo to Line Art</string>
+    <string name="lineart_original_photo">Original Photo</string>
+    <string name="lineart_btn_convert">✨ Convert to Line Art</string>
+    <string name="lineart_btn_reselect">Reselect</string>
+    <string name="lineart_btn_start_coloring">Start Coloring →</string>
+    <string name="lineart_converting">Converting…</string>
+    <string name="lineart_complete">Conversion Complete!</string>
+    <string name="lineart_result_preview">Line Art Preview</string>
+    <string name="lineart_detail_low">Low</string>
+    <string name="lineart_detail_high">High</string>
 
-    <!-- 线稿引擎选择 -->
+    <!-- Line art engine selection -->
     <string-array name="lineart_engines">
-        <item>OpenCV</item>
-        <item>XDoG</item>
-        <item>PiDiNet</item>
+        <item>Normal</item>
+        <item>Fine</item>
+        <item>Expert</item>
     </string-array>
+    <string name="lineart_engine_toast">Engine: %s</string>
+    <string name="template_star">Star</string>
+    <string name="template_heart">Heart</string>
+    <string name="template_flower">Flower</string>
+    <string name="template_house">House</string>
+    <string name="template_cat">Cat</string>
+    <string name="template_fish">Fish</string>
+    <string name="template_butterfly">Butterfly</string>
+    <string name="template_sun">Sun</string>
+    <string name="template_moon">Moon</string>
+    <string name="template_icecream">Ice Cream</string>
+    <string name="template_tree">Tree</string>
+    <string name="template_car">Car</string>
+    <string name="dialog_clear_title">Clear Canvas</string>
+    <string name="dialog_clear_message">Are you sure you want to clear all drawings?</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_discard_title">Discard Drawing</string>
+    <string name="dialog_discard_confirm">Discard</string>
+    <string name="dialog_discard_continue">Continue Drawing</string>
+    <string name="toast_load_failed">Failed to load template</string>
+    <string name="toast_save_failed">Save failed</string>
+    <string name="template_my_lineart">My Line Art</string>
+    <string name="template_my_photo">My Photo</string>
+    <string name="toast_photo_not_loaded">Photo not loaded</string>
+    <string name="toast_save_photo_failed">Failed to save photo</string>
+    <string name="language_dialog_title">Select Language</string>
 </resources>

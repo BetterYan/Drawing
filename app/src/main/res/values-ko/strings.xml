@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">아기 그리기</string>
+    <string name="btn_start_draw">그리기 시작 🎨</string>
+    <string name="splash_message">그림 그릴 준비가 되셨나요?</string>
+    <string name="main_title">아기 그리기</string>
+    <string name="main_subtitle">좋아하는 그림을 고르고 색칠을 시작하세요!</string>
+    <string name="gallery_title">그림 선택</string>
+    <string name="drawing_title">색칠하기</string>
+    <string name="tool_brush">붓</string>
+    <string name="tool_eraser">지우개</string>
+    <string name="tool_fill">채우기</string>
+    <string name="tool_undo">실행 취소</string>
+    <string name="tool_redo">다시 실행</string>
+    <string name="tool_clear">지우기</string>
+    <string name="btn_save">갤러리에 저장</string>
+    <string name="btn_discard">버리기</string>
+    <string name="save_success">갤러리에 저장되었습니다!</string>
+    <string name="save_failed">저장에 실패했습니다. 다시 시도해 주세요</string>
+    <string name="discard_confirm">정말 버리시겠습니까?</string>
+    <string name="no_template">자료를 찾을 수 없습니다. assets/templates 폴더에 이미지를 추가해 주세요</string>
+    <string name="region_lock_on_text">🔒 영역 내 색칠</string>
+    <string name="region_lock_off_text">🔓 자유 색칠</string>
+    <string name="region_toggle_on">영역 잠금이 켜졌습니다</string>
+    <string name="region_toggle_off">영역 잠금이 꺼졌습니다</string>
+
+    <string name="gallery_import_photo">📷 사진 가져오기</string>
+    <string name="gallery_my_photo">내 사진</string>
+    <string name="photo_source_title">사진 출처 선택</string>
+    <string name="photo_source_gallery">🖼️ 갤러리에서</string>
+    <string name="photo_source_camera">📷 사진 찍기</string>
+    <string name="photo_camera_error">카메라를 시작할 수 없습니다. 카메라 권한을 확인해 주세요</string>
+    <string name="lineart_title">사진을 선화로 변환</string>
+    <string name="lineart_original_photo">원본 사진</string>
+    <string name="lineart_btn_convert">✨ 선화로 변환</string>
+    <string name="lineart_btn_reselect">다시 선택</string>
+    <string name="lineart_btn_start_coloring">색칠 시작 →</string>
+    <string name="lineart_converting">변환 중…</string>
+    <string name="lineart_complete">변환 완료!</string>
+    <string name="lineart_result_preview">선화 미리보기</string>
+    <string name="lineart_detail_low">간략</string>
+    <string name="lineart_detail_high">정밀</string>
+
+    <string-array name="lineart_engines">
+        <item>일반</item>
+        <item>정밀</item>
+        <item>전문가</item>
+    </string-array>
+    <string name="lineart_engine_toast">엔진: %s</string>
+    <string name="template_star">별</string>
+    <string name="template_heart">하트</string>
+    <string name="template_flower">꽃</string>
+    <string name="template_house">집</string>
+    <string name="template_cat">고양이</string>
+    <string name="template_fish">물고기</string>
+    <string name="template_butterfly">나비</string>
+    <string name="template_sun">태양</string>
+    <string name="template_moon">달</string>
+    <string name="template_icecream">아이스크림</string>
+    <string name="template_tree">나무</string>
+    <string name="template_car">자동차</string>
+    <string name="dialog_clear_title">캔버스 지우기</string>
+    <string name="dialog_clear_message">모든 그림을 지우시겠습니까?</string>
+    <string name="dialog_confirm">확인</string>
+    <string name="dialog_cancel">취소</string>
+    <string name="dialog_discard_title">그림 버리기</string>
+    <string name="dialog_discard_confirm">버리기</string>
+    <string name="dialog_discard_continue">계속 그리기</string>
+    <string name="toast_load_failed">템플릿 불러오기 실패</string>
+    <string name="toast_save_failed">저장 실패</string>
+    <string name="template_my_lineart">내 선화</string>
+    <string name="template_my_photo">내 사진</string>
+    <string name="toast_photo_not_loaded">사진이 로드되지 않았습니다</string>
+    <string name="toast_save_photo_failed">사진 저장에 실패했습니다</string>
+    <string name="language_dialog_title">언어 선택</string>
+</resources>

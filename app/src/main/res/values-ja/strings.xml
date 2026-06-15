@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ベビーお絵描き</string>
+    <string name="btn_start_draw">お絵描き開始 🎨</string>
+    <string name="splash_message">お絵描きの準備はできましたか？</string>
+    <string name="main_title">ベビーお絵描き</string>
+    <string name="main_subtitle">好きな絵を選んで塗り絵を始めよう！</string>
+    <string name="gallery_title">絵を選択</string>
+    <string name="drawing_title">塗り絵</string>
+    <string name="tool_brush">ブラシ</string>
+    <string name="tool_eraser">消しゴム</string>
+    <string name="tool_fill">塗りつぶし</string>
+    <string name="tool_undo">元に戻す</string>
+    <string name="tool_redo">やり直し</string>
+    <string name="tool_clear">クリア</string>
+    <string name="btn_save">ギャラリーに保存</string>
+    <string name="btn_discard">破棄</string>
+    <string name="save_success">ギャラリーに保存しました！</string>
+    <string name="save_failed">保存に失敗しました。もう一度お試しください</string>
+    <string name="discard_confirm">本当に破棄しますか？</string>
+    <string name="no_template">素材が見つかりません。assets/templates フォルダに画像を追加してください</string>
+    <string name="region_lock_on_text">🔒 領域内塗り絵</string>
+    <string name="region_lock_off_text">🔓 自由塗り絵</string>
+    <string name="region_toggle_on">領域ロックがオンになりました</string>
+    <string name="region_toggle_off">領域ロックがオフになりました</string>
+
+    <string name="gallery_import_photo">📷 写真をインポート</string>
+    <string name="gallery_my_photo">マイ写真</string>
+    <string name="photo_source_title">写真のソースを選択</string>
+    <string name="photo_source_gallery">🖼️ ギャラリーから</string>
+    <string name="photo_source_camera">📷 写真を撮る</string>
+    <string name="photo_camera_error">カメラを起動できません。カメラの権限を確認してください</string>
+    <string name="lineart_title">写真を線画に変換</string>
+    <string name="lineart_original_photo">元の写真</string>
+    <string name="lineart_btn_convert">✨ 線画に変換</string>
+    <string name="lineart_btn_reselect">再選択</string>
+    <string name="lineart_btn_start_coloring">塗り絵を開始 →</string>
+    <string name="lineart_converting">変換中…</string>
+    <string name="lineart_complete">変換完了！</string>
+    <string name="lineart_result_preview">線画プレビュー</string>
+    <string name="lineart_detail_low">簡易</string>
+    <string name="lineart_detail_high">詳細</string>
+
+    <string-array name="lineart_engines">
+        <item>普通</item>
+        <item>詳細</item>
+        <item>専門家</item>
+    </string-array>
+    <string name="lineart_engine_toast">エンジン: %s</string>
+    <string name="template_star">星</string>
+    <string name="template_heart">ハート</string>
+    <string name="template_flower">花</string>
+    <string name="template_house">家</string>
+    <string name="template_cat">猫</string>
+    <string name="template_fish">魚</string>
+    <string name="template_butterfly">蝶々</string>
+    <string name="template_sun">太陽</string>
+    <string name="template_moon">月</string>
+    <string name="template_icecream">アイスクリーム</string>
+    <string name="template_tree">木</string>
+    <string name="template_car">車</string>
+    <string name="dialog_clear_title">キャンバスをクリア</string>
+    <string name="dialog_clear_message">すべての絵を消去してもよろしいですか？</string>
+    <string name="dialog_confirm">確認</string>
+    <string name="dialog_cancel">キャンセル</string>
+    <string name="dialog_discard_title">絵を破棄</string>
+    <string name="dialog_discard_confirm">破棄</string>
+    <string name="dialog_discard_continue">描き続ける</string>
+    <string name="toast_load_failed">テンプレートの読み込みに失敗しました</string>
+    <string name="toast_save_failed">保存に失敗しました</string>
+    <string name="template_my_lineart">私の線画</string>
+    <string name="template_my_photo">私の写真</string>
+    <string name="toast_photo_not_loaded">写真が読み込まれていません</string>
+    <string name="toast_save_photo_failed">写真の保存に失敗しました</string>
+    <string name="language_dialog_title">言語を選択</string>
+</resources>

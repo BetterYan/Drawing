@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import com.zucky.drawing.R
 
 /**
  * 绘图模板数据类
@@ -13,7 +14,8 @@ data class Template(
     val id: String,
     val name: String,
     val emoji: String,
-    val source: TemplateSource
+    val source: TemplateSource,
+    val nameResId: Int = 0
 )
 
 sealed class TemplateSource {
@@ -28,20 +30,20 @@ sealed class TemplateSource {
  */
 object TemplateGenerator {
 
-    /** 内置模板列表 */
+    /** 内置模板列表（name 为 fallback 英文，nameResId 指向多语言字符串资源） */
     val builtInTemplates = listOf(
-        Template("star", "小星星", "⭐", TemplateSource.BuiltIn(0)),
-        Template("heart", "爱心", "❤️", TemplateSource.BuiltIn(1)),
-        Template("flower", "小花花", "🌸", TemplateSource.BuiltIn(2)),
-        Template("house", "小房子", "🏠", TemplateSource.BuiltIn(3)),
-        Template("cat", "小猫咪", "🐱", TemplateSource.BuiltIn(4)),
-        Template("fish", "小鱼儿", "🐟", TemplateSource.BuiltIn(5)),
-        Template("butterfly", "小蝴蝶", "🦋", TemplateSource.BuiltIn(6)),
-        Template("sun", "太阳公公", "☀️", TemplateSource.BuiltIn(7)),
-        Template("moon", "月亮姐姐", "🌙", TemplateSource.BuiltIn(8)),
-        Template("icecream", "冰淇淋", "🍦", TemplateSource.BuiltIn(9)),
-        Template("tree", "小树", "🌳", TemplateSource.BuiltIn(10)),
-        Template("car", "小汽车", "🚗", TemplateSource.BuiltIn(11)),
+        Template("star", "Star", "⭐", TemplateSource.BuiltIn(0), R.string.template_star),
+        Template("heart", "Heart", "❤️", TemplateSource.BuiltIn(1), R.string.template_heart),
+        Template("flower", "Flower", "🌸", TemplateSource.BuiltIn(2), R.string.template_flower),
+        Template("house", "House", "🏠", TemplateSource.BuiltIn(3), R.string.template_house),
+        Template("cat", "Cat", "🐱", TemplateSource.BuiltIn(4), R.string.template_cat),
+        Template("fish", "Fish", "🐟", TemplateSource.BuiltIn(5), R.string.template_fish),
+        Template("butterfly", "Butterfly", "🦋", TemplateSource.BuiltIn(6), R.string.template_butterfly),
+        Template("sun", "Sun", "☀️", TemplateSource.BuiltIn(7), R.string.template_sun),
+        Template("moon", "Moon", "🌙", TemplateSource.BuiltIn(8), R.string.template_moon),
+        Template("icecream", "Ice Cream", "🍦", TemplateSource.BuiltIn(9), R.string.template_icecream),
+        Template("tree", "Tree", "🌳", TemplateSource.BuiltIn(10), R.string.template_tree),
+        Template("car", "Car", "🚗", TemplateSource.BuiltIn(11), R.string.template_car),
     )
 
     private val outlinePaint = Paint().apply {

@@ -31,7 +31,11 @@ class TemplateAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(template: Template) {
-            binding.tvTemplateName.text = template.name
+            binding.tvTemplateName.text = if (template.nameResId != 0) {
+                binding.root.context.getString(template.nameResId)
+            } else {
+                template.name
+            }
             binding.tvTemplateEmoji.text = template.emoji
 
             // 生成缩略图

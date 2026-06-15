@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vauvan piirustus</string>
+    <string name="btn_start_draw">Aloita piirtäminen 🎨</string>
+    <string name="splash_message">Valmis piirtämään?</string>
+    <string name="main_title">Vauvan piirustus</string>
+    <string name="main_subtitle">Valitse kuva ja aloita väritys!</string>
+    <string name="gallery_title">Valitse kuva</string>
+    <string name="drawing_title">Väritys</string>
+    <string name="tool_brush">Sivellin</string>
+    <string name="tool_eraser">Pyyhekumi</string>
+    <string name="tool_fill">Täyttö</string>
+    <string name="tool_undo">Kumoa</string>
+    <string name="tool_redo">Toista</string>
+    <string name="tool_clear">Tyhjennä</string>
+    <string name="btn_save">Tallenna galleriaan</string>
+    <string name="btn_discard">Hylkää</string>
+    <string name="save_success">Tallennettu galleriaan!</string>
+    <string name="save_failed">Tallennus epäonnistui, yritä uudelleen</string>
+    <string name="discard_confirm">Haluatko varmasti hylätä?</string>
+    <string name="no_template">Malleja ei löytynyt. Lisää kuvia assets/templates-kansioon</string>
+    <string name="region_lock_on_text">🔒 Alueen sisällä</string>
+    <string name="region_lock_off_text">🔓 Vapaa väritys</string>
+    <string name="region_toggle_on">Aluelukitus päällä</string>
+    <string name="region_toggle_off">Aluelukitus pois</string>
+
+    <string name="gallery_import_photo">📷 Tuo valokuva</string>
+    <string name="gallery_my_photo">Omat valokuvat</string>
+    <string name="photo_source_title">Valitse valokuvan lähde</string>
+    <string name="photo_source_gallery">🖼️ Galleriasta</string>
+    <string name="photo_source_camera">📷 Ota valokuva</string>
+    <string name="photo_camera_error">Kameraa ei voi käynnistää, tarkista lupa</string>
+    <string name="lineart_title">Valokuva viivapiirrokseksi</string>
+    <string name="lineart_original_photo">Alkuperäinen valokuva</string>
+    <string name="lineart_btn_convert">✨ Muunna viivapiirrokseksi</string>
+    <string name="lineart_btn_reselect">Valitse uudelleen</string>
+    <string name="lineart_btn_start_coloring">Aloita väritys →</string>
+    <string name="lineart_converting">Muunnetaan…</string>
+    <string name="lineart_complete">Muunnos valmis!</string>
+    <string name="lineart_result_preview">Esikatselu</string>
+    <string name="lineart_detail_low">Yksinkertainen</string>
+    <string name="lineart_detail_high">Yksityiskohtainen</string>
+
+    <string-array name="lineart_engines">
+        <item>Normaali</item>
+        <item>Hieno</item>
+        <item>Asiantuntija</item>
+    </string-array>
+    <string name="lineart_engine_toast">Moottori: %s</string>
+    <string name="template_star">Tähti</string>
+    <string name="template_heart">Sydän</string>
+    <string name="template_flower">Kukka</string>
+    <string name="template_house">Talo</string>
+    <string name="template_cat">Kissa</string>
+    <string name="template_fish">Kala</string>
+    <string name="template_butterfly">Perhonen</string>
+    <string name="template_sun">Aurinko</string>
+    <string name="template_moon">Kuu</string>
+    <string name="template_icecream">Jäätelö</string>
+    <string name="template_tree">Puu</string>
+    <string name="template_car">Auto</string>
+    <string name="dialog_clear_title">Tyhjennä kangas</string>
+    <string name="dialog_clear_message">Haluatko varmasti tyhjentää kaikki piirustukset?</string>
+    <string name="dialog_confirm">Vahvista</string>
+    <string name="dialog_cancel">Peruuta</string>
+    <string name="dialog_discard_title">Hylkää piirustus</string>
+    <string name="dialog_discard_confirm">Hylkää</string>
+    <string name="dialog_discard_continue">Jatka piirtämistä</string>
+    <string name="toast_load_failed">Mallin lataus epäonnistui</string>
+    <string name="toast_save_failed">Tallennus epäonnistui</string>
+    <string name="template_my_lineart">Oma piirustukseni</string>
+    <string name="template_my_photo">Oma valokuva</string>
+    <string name="toast_photo_not_loaded">Valokuvaa ei ladattu</string>
+    <string name="toast_save_photo_failed">Valokuvan tallennus epäonnistui</string>
+    <string name="language_dialog_title">Valitse kieli</string>
+</resources>

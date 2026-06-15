@@ -160,7 +160,7 @@ class DrawingActivity : AppCompatActivity() {
             bitmap?.let {
                 binding.drawingView.templateBitmap = it
             } ?: run {
-                Toast.makeText(this@DrawingActivity, "加载模板失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@DrawingActivity, R.string.toast_load_failed, Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
@@ -274,13 +274,13 @@ class DrawingActivity : AppCompatActivity() {
         // 清空
         binding.btnClear.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("清空画布")
-                .setMessage("确定要清空所有绘画吗？")
-                .setPositiveButton("确定") { _, _ ->
+                .setTitle(R.string.dialog_clear_title)
+                .setMessage(R.string.dialog_clear_message)
+                .setPositiveButton(R.string.dialog_confirm) { _, _ ->
                     binding.drawingView.clearAll()
                     updateUndoRedoState()
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.dialog_cancel, null)
                 .show()
         }
     }
@@ -317,13 +317,13 @@ class DrawingActivity : AppCompatActivity() {
 
     private fun showDiscardConfirmDialog() {
         AlertDialog.Builder(this)
-            .setTitle("放弃绘画")
+            .setTitle(R.string.dialog_discard_title)
             .setMessage(getString(R.string.discard_confirm))
-            .setPositiveButton("确定放弃") { _, _ ->
+            .setPositiveButton(R.string.dialog_discard_confirm) { _, _ ->
                 finish()
                 applyTransition(TRANSITION_CLOSE, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
             }
-            .setNegativeButton("继续画", null)
+            .setNegativeButton(R.string.dialog_discard_continue, null)
             .show()
     }
 
@@ -373,7 +373,7 @@ class DrawingActivity : AppCompatActivity() {
             }
 
             if (resultBitmap == null) {
-                Toast.makeText(this@DrawingActivity, "保存失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@DrawingActivity, R.string.toast_save_failed, Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
